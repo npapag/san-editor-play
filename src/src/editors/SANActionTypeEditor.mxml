@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.Application;
+			import mx.events.FlexEvent;
+			
+			import util.CodeHighlighter;
+			import util.Util;
+			
+			[Bindable]
+			public  var treeSAN:mx.controls.Tree;			
+			[Bindable]
+			public var sanXML:XML;
+			[Bindable] var sumWeights:Number;
+			
+			[Bindbable]
+			private var actions:XML = util.Util.actionList ;
+			private var hl1:CodeHighlighter ;
+			
+			[Bindable]
+			private var _TXTWIDTH:int = 200;
+			
+			[Bindable]
+			private var selectedCriteriaName:String = "";
+			
+			public function init():void {
+				//this.treeSAN = (parent as SANItemEditor).treeSAN;
+				if (actions == null) actions = util.Util.actionList;
+				cmbActionTypes.dataProvider = actions.Action;						
+				cmbActionTypes.labelField = "@name";
+				trace(treeSAN.selectedItem.@id);				
+				this.selectType(this.treeSAN.selectedItem.@type);
+				this.vstack.selectedIndex = 7; //empty 
+				switchDetailForm(this.treeSAN.selectedItem.@type);
+				
+				hl1 = new CodeHighlighter(this.txtDefinedBy1);
+				this.txtDefinedBy1.addEventListener(Event.CHANGE,hl1.codeHighlight);						
+				this.txtDefinedBy1.addEventListener(FlexEvent.CREATION_COMPLETE,hl1.codeHighlight);				
+				//this.txtDefinedBy1.addEventListener(Event.COMPLETE,hl1.codeHighlight);
+				
+				if (this.treeSAN.selectedItem.@selectionMethod == "LOWA" ) { 
+					this.btEditMappings.visible = true;					
+				} else { 
+					this.btEditMappings.visible = false;
+				}
+				
+			}
+			
+			private function switchDetailForm(type:String):void {				
+				switch (type) {
+					case "Primitive":						
+						this.vstack.selectedIndex = 0;						
+						break;
+					case "Abstract":
+						this.vstack.selectedIndex = 1;
+						this.cmbRPolicyType.selectedIndex = this.getSelectedRPolicyIndex();
+						this.cmbSMethodType.selectedIndex = this.getSelectedSMethodIndex();
+						this.refreshCriteriaList();
+						break;
+					case "Calculation":
+						this.vstack.selectedIndex = 2;
+						break;
+					case "Mount":
+						this.vstack.selectedIndex = 3;
+						break;
+					case "Sequence":
+						this.vstack.selectedIndex = 4;
+						break;
+					case "Selector":
+						this.vstack.selectedIndex = 5;
+						break;
+					case "ParallelAny":
+						this.vstack.selectedIndex = 6;
+						break;
+					case "ParallelAll":
+						this.vstack.selectedIndex = 7;
+						break;
+					default:
+						this.vstack.selectedIndex = 8;
+						break;
+				}
+			}
+			
+			private function onChangeType(event:Event):void {
+				//label.text =event.currentTarget.selectedItem.label + " " + 
+				//Alert.show(event.currentTarget.selectedItem.@type);
+				if (event.currentTarget.selectedItem.@value!="empty") 
+					this.treeSAN.selectedItem.@type = event.currentTarget.selectedItem.@name;
+				else
+					this.treeSAN.selectedItem.@type = "";
+				//Alert.show(event.currentTarget.selectedItem.@type);
+				switchDetailForm(this.treeSAN.selectedItem.@type);
+			}
+			
+			private function selectType(type:String):void {
+				var idx:int = -1;
+				var found:Boolean = false;				
+				for each (var action:XML in actions.Action)
+				{
+					//total2 += prop.@quantity * prop.price;
+					idx++;
+					if (action.@name == type) {
+						this.cmbActionTypes.selectedIndex = idx;
+						found = true;
+						break;
+					}
+				} 				
+				if (!found) {					
+					this.cmbActionTypes.selectedIndex = 0;
+				}
+			}												
+			
+			public function onAddCriteria():void {	
+				var dir:String = this.cmbCriteriaDirections.selectedItem.@value;
+				var type:String = this.cmbCriteriaTypes.selectedItem.@value;
+				if (type=="STRING") dir = "N/A";
+				var xml:XML = 
+					<criteria 
+						name={this.txtCriteriaName.text} 
+				weight={this.txtCriteriaWeight.text}
+				type={type}
+				direction={dir}
+				/>;
+				(this.treeSAN.selectedItem as XML).appendChild(xml);
+				refreshCriteriaList(); 
+			}
+			
+			private function onAddMapping():void {
+				var xml:XML = 
+					<mapping 
+						mvalue={this.txtCiteriaValue.text}
+				mappingstr={this.txtCriteriaMapping.text}						 
+				/>;				
+				
+				var item:XML = this.treeSAN.selectedItem as XML;
+				if (item!=null) {					                	            
+					var children:XMLList = XMLList(item.children());
+					for(var i:Number=0; i < children.length(); i++) {
+						if( children[i].@name == this.selectedCriteriaName ) {							
+							children[i].appendChild(xml);
+							this.dgridCriteriaMappings.dataProvider = children[i].mapping;
+							break;
+						}
+					}//for
+				}//if				
+			}
+			
+			private function onEditMappings():void {
+				if (this.dgridAbstractCriteria.selectedItems.length > 0) {
+					//Alert.show("Open mapping editor for " + this.dgridAbstractCriteria.selectedItem.@name);
+					this.selectedCriteriaName = this.dgridAbstractCriteria.selectedItem.@name ;
+					this.vsCriteriaEditors.selectedIndex = 1;
+					this.lblCriteriaMapping.text = "Edit Value Mappings for '" + this.selectedCriteriaName + "'" ; 
+					//init data															
+					var item:XML = this.treeSAN.selectedItem as XML;
+					if (item!=null) {					                	            
+						var children:XMLList = XMLList(item.children());
+						for(var i:Number=0; i < children.length(); i++) {
+							if( children[i].@name == this.selectedCriteriaName ) {
+								this.dgridCriteriaMappings.dataProvider = children[i].mapping;            	
+							}
+						}//for
+					}//if
+				} else {
+					Alert.show("Please select an item from the list.");
+				} 
+				
+			}
+			
+			public function onDeleteMapping(e:Event):void {
+				Alert.show("Under construction...");
+			}
+			
+			public function onDeleteCriteria(e:Event):void {				
+				var target:String = null; 
+				target = this.dgridAbstractCriteria.selectedItem.@name;
+				if (target==null) {Alert.show("Please select an item from the list."); return; };
+				var item:XML = this.treeSAN.selectedItem as XML;
+				if (item!=null) {					                	            
+					var children:XMLList = XMLList(item.children());
+					for(var i:Number=0; i < children.length(); i++) {
+						if( children[i].@name == target ) {
+							delete children[i];            	
+						}
+					}//for
+				}//if
+				refreshCriteriaList();
+				trace("Delete");
+			}
+			
+			private function refreshCriteriaList():void {
+				this.dgridAbstractCriteria.dataProvider = this.treeSAN.selectedItem.criteria ;
+				calculateCriteriaWeightSum();
+			}
+			
+			private function calculateCriteriaWeightSum():Number {
+				//Calculate
+				this.sumWeights = 0;
+				try {					
+					for each (var c:XML in this.treeSAN.selectedItem.criteria) {
+						this.sumWeights = Number(this.sumWeights) + Number(c.@weight) ;
+					}
+				} catch (e:Error) {
+					Alert.show(e.toString());
+				}
+				return this.sumWeights;
+			}
+			
+			//Abstract action selection method
+			//selection method type handling
+			private function onSMethodTypeChange(e:Event):void {
+				this.treeSAN.selectedItem.@selectionMethod
+					= this.cmbSMethodType.selectedItem.@value;
+			}
+			//Abstract action selection method
+			private function getSelectedSMethodIndex():int {
+				trace("*** getSelectedSMethodIndex : " + this.treeSAN.selectedItem.@selectionMethod);
+				var i:int = 0;				
+				for each (var met:XML in Application.application.appStaticDataXML.SelectionMethods.SMethod) {
+					trace(met.toXMLString());
+					if (met.@value == this.treeSAN.selectedItem.@selectionMethod) return i;
+					i++;
+				}				
+				return 0;
+			}
+			
+			//selection method type handling
+			private function onRPolicyTypeChange(e:Event):void {
+				this.treeSAN.selectedItem.@resolutionPolicy
+					= this.cmbRPolicyType.selectedItem.@value;
+			}
+			//Abstract action resolution policy
+			private function getSelectedRPolicyIndex():int {
+				trace("*** getSelectedRPolicyIndex : " + this.treeSAN.selectedItem.@resolutionPolicy);
+				var i:int = 0;				
+				for each (var item:XML in Application.application.appStaticDataXML.ResolutionPolicies.RPolicy) {
+					trace(item.toXMLString());
+					if (item.@value == this.treeSAN.selectedItem.@resolutionPolicy) return i;
+					i++;
+				}				
+				return 0;
+			}
+			
+			private function onChangeCriteriaDirection(e:Event):void {
+				trace(e);
+				//TODO
+			}
+			
+			private function onChangeCriteriaType(e:Event):void {
+				if (this.cmbCriteriaTypes.selectedItem.@value != "NUMBER") {
+					this.cmbCriteriaDirections.enabled = false;
+				}
+				else 
+					this.cmbCriteriaDirections.enabled = true;
+				
+			}
+			
+			private function onNormalizeWeigths(e:Event):void {
+				trace(e);
+				this.calculateCriteriaWeightSum();
+				for each (var c:XML in this.treeSAN.selectedItem.criteria) {					
+					c.@weight = 
+						c.@weight / this.sumWeights; 
+				}
+				this.refreshCriteriaList();
+			}
+			
+			private function onCriteriaChange():void {
+				trace("CriteriaChange event ");
+				for each (var c:XML in this.treeSAN.selectedItem.criteria) {
+					trace(c);
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:NumberValidator source="{this.txtCriteriaWeight}" property="text"
+						domain="real" minValue="0" maxValue="1.0" />
+	
+	<mx:Form width="100%">
+		<mx:FormItem label="Type" width="100%">
+			<!--			
+			<mx:TextInput id="txtActionType" width="100"
+			change="//onChangeConDialect()"
+			text="{this.treeSAN.selectedItem.@name}"
+			/>
+			-->
+			<mx:ComboBox id="cmbActionTypes" change="onChangeType(event)"  />
+		</mx:FormItem>					
+	</mx:Form>
+	<mx:ViewStack id="vstack" width="100%" height="100%">		
+		<mx:Form width="100%" height="100%" ><!-- 0 : Primitive-->
+			<mx:FormItem label="Command" width="100%">							
+				<mx:TextInput id="txtCommand" width="{_TXTWIDTH}"
+							  change="{this.treeSAN.selectedItem.@command = this.txtCommand.text}"
+							  text="{this.treeSAN.selectedItem.@command}"
+							  />								
+			</mx:FormItem>
+			<mx:FormItem label="Dialect" width="100%">				
+				<mx:TextInput id="txtDialect1" width="100"
+							  change="{this.treeSAN.selectedItem.@dialect = this.txtDialect1.text}"
+							  text="{this.treeSAN.selectedItem.@dialect}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Defined By" width="100%"  height="100%">
+				<mx:TextArea id="txtDefinedBy1" width="100%" height="100%" styleName="codeTextArea"
+							 change="{this.treeSAN.selectedItem.@definedBy = this.txtDefinedBy1.text}"
+							 text="{this.treeSAN.selectedItem.@definedBy}"
+							 />
+			</mx:FormItem>								
+		</mx:Form>
+		<mx:Form width="100%"><!-- 1: Abstract -->
+			<mx:FormItem label="Action Pool" width="100%">
+				<!-- action-pool
+				selection-method -->
+				<mx:TextInput id="txtActionPool" width="550"
+							  change="{this.treeSAN.selectedItem.@actionPool = this.txtActionPool.text}"
+							  text="{this.treeSAN.selectedItem.@actionPool}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Selection Method" width="100%">
+				<mx:HBox width="100%">
+					<!--
+					<mx:TextInput id="txtSelectionMethod" width="{_TXTWIDTH}"
+					change="{this.treeSAN.selectedItem.@selectionMethod = this.txtSelectionMethod.text}"
+					text="{this.treeSAN.selectedItem.@selectionMethod}"
+					/>
+					-->
+					<mx:ComboBox id="cmbSMethodType"  width="100"							 
+								 dataProvider="{Application.application.appStaticDataXML.SelectionMethods.SMethod}"
+								 selectedIndex="{getSelectedSMethodIndex()}"
+								 change="onSMethodTypeChange(event);"
+								 labelField="@name"
+								 />
+					<mx:Label  text="Resolution Policy" />
+					<!--
+					<mx:TextInput id="txtResolutionPolicy" width="{_TXTWIDTH}"
+					change="{this.treeSAN.selectedItem.@resolutionPolicy = this.txtResolutionPolicy.text}"
+					text="{this.treeSAN.selectedItem.@resolutionPolicy}"
+					/>
+					-->
+					<mx:ComboBox id="cmbRPolicyType"  width="400"							 
+								 dataProvider="{Application.application.appStaticDataXML.ResolutionPolicies.RPolicy}"
+								 selectedIndex="{getSelectedRPolicyIndex()}"
+								 change="onRPolicyTypeChange(event);"
+								 labelField="@name"
+								 />
+				</mx:HBox>
+			</mx:FormItem>
+			<mx:FormItem label="Selection Method Conf." width="100%">
+				<mx:TextInput id="txtSelectionMethodConfig" width="100%"
+							  change="{this.treeSAN.selectedItem.@selectionMethodConfig = this.txtSelectionMethodConfig.text}"
+							  text="{this.treeSAN.selectedItem.@selectionMethodConfig}"
+							  />
+			</mx:FormItem>
+			
+			<mx:FormItem label="Criteria" width="100%">	
+				<mx:ViewStack id="vsCriteriaEditors" height="100%" width="100%">
+					<mx:VBox height="100%" width="100%">											
+						<mx:DataGrid id="dgridAbstractCriteria" 
+									 dataProvider="{this.treeSAN.selectedItem.criteria}"
+									 change="onCriteriaChange()"
+									 height="150" width="550" editable="true">
+							<mx:columns>					
+								<mx:DataGridColumn dataField="@name" headerText="Name" 									   							   
+												   editable="true">
+									<mx:itemRenderer>
+										<mx:Component>
+											<mx:Label truncateToFit="true" fontWeight="bold" />
+										</mx:Component>
+									</mx:itemRenderer>
+								</mx:DataGridColumn>					
+								<mx:DataGridColumn dataField="@weight" headerText="Weight" width="100" 									   							   
+												   editable="true">				
+								</mx:DataGridColumn>								
+								<mx:DataGridColumn dataField="@type" headerText="Type" width="100" 									   							   
+												   editable="true" >									
+								</mx:DataGridColumn>
+								<mx:DataGridColumn dataField="@direction" headerText="Direction"  width="80"									   							   
+												   editable="true">									
+								</mx:DataGridColumn>
+							</mx:columns>		
+						</mx:DataGrid>
+						<mx:ControlBar>						
+							<mx:Label text="Name" />
+							<mx:TextInput id="txtCriteriaName" text="" />
+							<mx:Label  text="Weight" />
+							<mx:TextInput id="txtCriteriaWeight" text=""  width="30"/>
+							<mx:Label  text="Type" />
+							<!-- <mx:TextInput id="txtCriteriaType" text="" /> -->
+							<mx:ComboBox id="cmbCriteriaTypes" 
+										 labelField="@name"
+										 dataProvider="{Application.application.appStaticDataXML.CriteriaTypes.Type}" 
+										 change="onChangeCriteriaType(event)"  />
+							<mx:Label  text="Direction" />
+							<mx:ComboBox id="cmbCriteriaDirections"
+										 labelField="@name"
+										 dataProvider="{Application.application.appStaticDataXML.CriteriaDirections.Direction}" 
+										 change="onChangeCriteriaDirection(event)"  />
+						</mx:ControlBar>
+						<mx:ControlBar width="100%" horizontalAlign="left">
+							<mx:Button label="Add" click="onAddCriteria()"/>
+							<mx:Button label="Delete" click="onDeleteCriteria(event)"/>
+							<mx:Button id="btEditMappings" label="Edit Mappings" click="onEditMappings();" />
+							<mx:Button id="btNormalize" label="Normalize" click="onNormalizeWeigths(event)" 
+									   toolTip="Normalize Weights" />
+							<mx:Label text="{' Sum='+sumWeights}" />
+						</mx:ControlBar>
+					</mx:VBox>
+					<mx:VBox height="100%" width="100%">							
+						<mx:DataGrid id="dgridCriteriaMappings"  
+									 height="150" width="500" editable="true">
+							<mx:columns>					
+								<mx:DataGridColumn dataField="@mvalue" headerText="Value" 									   							   
+												   editable="true">									
+								</mx:DataGridColumn>					
+								<mx:DataGridColumn dataField="@mappingstr" headerText="Mapping" 									   							   
+												   editable="true">				
+								</mx:DataGridColumn>								
+							</mx:columns>		
+						</mx:DataGrid>
+						
+						<mx:ControlBar>
+							<mx:Label id="lblCriteriaMapping" />
+							<mx:Label text="Value" />
+							<mx:TextInput id="txtCiteriaValue" text="" />
+							<mx:Label  text="Mapping" />
+							<mx:TextInput id="txtCriteriaMapping" text="" />
+						</mx:ControlBar>
+						
+						<mx:ControlBar>
+							<mx:Button label="Add" click="onAddMapping()"/>
+							<mx:Button label="Delete" click="onDeleteMapping(event)"/>
+							<mx:Button id="btBackToEditCriteria" label="Back" 
+									   click="{this.vsCriteriaEditors.selectedIndex =0}" /> 
+						</mx:ControlBar>
+					</mx:VBox>
+				</mx:ViewStack>
+			</mx:FormItem>						
+		</mx:Form>
+		
+		<mx:Form width="100%" height="100%"><!-- 2: Calculation -->
+			<mx:FormItem label="Dialect" width="100%">				
+				<mx:TextInput id="txtDialect" width="100"
+							  change="{this.treeSAN.selectedItem.@dialect = this.txtDialect.text}"
+							  text="{this.treeSAN.selectedItem.@dialect}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Defined By" width="100%" height="100%">
+				<mx:TextArea id="txtDefinedBy" width="100%" height="100%"
+							 change="{this.treeSAN.selectedItem.@definedBy = this.txtDefinedBy.text}"
+							 text="{this.treeSAN.selectedItem.@definedBy}"
+							 />
+			</mx:FormItem>					
+		</mx:Form>
+		<mx:Form width="100%"><!-- 3: Mount -->
+			<mx:FormItem label="Mount SAN" width="100%">
+				<mx:TextInput id="txtMountSAN" width="100%"
+							  change="{this.treeSAN.selectedItem.@mountSAN = this.txtMountSAN.text}"
+							  text="{this.treeSAN.selectedItem.@mountSAN}"
+							  />				
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form><!-- 4 Sequence -->
+			<mx:FormItem label="Selection Method" width="100%">
+				<mx:TextInput id="txtSeqSelectionMethod" width="100%"
+							  change="{this.treeSAN.selectedItem.@selectionMethod = this.txtSeqSelectionMethod.text}"
+							  text="{this.treeSAN.selectedItem.@selectionMethod}"
+							  />
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form width="100%"><!-- 5 Selector -->
+			<mx:FormItem label="Selection Method" width="100%">
+				<mx:TextInput id="txtSelSelectionMethod" width="100%"
+							  change="{this.treeSAN.selectedItem.@selectionMethod = this.txtSelSelectionMethod.text}"
+							  text="{this.treeSAN.selectedItem.@selectionMethod}"
+							  />				
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form><!-- 6 Par. Any -->
+			<mx:FormItem label="ParallelAny" width="100%">								
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form><!-- 7 Par. All -->
+			<mx:FormItem label="ParallelAll" width="100%">								
+			</mx:FormItem>
+		</mx:Form>		
+		<mx:Form><!-- 8 Empty -->
+			<!-- empty form -->
+		</mx:Form>
+	</mx:ViewStack>	
+</mx:VBox>

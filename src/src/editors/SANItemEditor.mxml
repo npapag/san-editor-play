@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" 
+				title="Item Editor" x="168" y="86" status="" showCloseButton="true" 
+				width="680" height="560"  styleName="_no_popUpWin"
+				close="PopUpManager.removePopUp(this);" borderAlpha="0.99" xmlns:local="*" xmlns:editors="editors.*">
+	
+	<mx:Script>
+		<![CDATA[       
+			import util.Util;
+			import mx.controls.Text;
+			import mx.controls.Tree;
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			
+			private var editorType:String = "";
+			[Bindable]
+			public  var treeSAN:mx.controls.Tree;
+			[Bindable]
+			public var sanXML:XML;
+			
+			public function init(_editorType:String):void {
+				this.editorType = _editorType;
+				this.title = this.editorType;
+				switch (this.editorType) {
+					case "showAction":
+						this.vsItemDetails.selectedIndex = 0;
+						this.title = "Edit Action";
+						this.actionEditor.treeSAN = treeSAN;
+						this.actionEditor.sanXML = this.sanXML;
+						this.actionEditor.init();						
+						break;
+					case "showSituation":
+						this.vsItemDetails.selectedIndex = 1;
+						this.title = "Edit Situation";
+						this.situationEditor.treeSAN = treeSAN;
+						this.situationEditor.sanXML = this.sanXML;
+						this.situationEditor.init();
+						break;
+					case "showCondition":
+						this.vsItemDetails.selectedIndex = 2;
+						this.title = "Edit Condition";
+						break;
+					case "showDecorator":
+						this.vsItemDetails.selectedIndex = 3;
+						this.title = "Edit Decorator";
+						this.decorEditor.treeSAN = treeSAN;
+						this.decorEditor.sanXML = this.sanXML;
+						this.decorEditor.init();
+						break;
+					case "showActionPool":
+						this.vsItemDetails.selectedIndex = 4;
+						this.title = "Edit Action Pool";
+						break;
+					case "showGoal":
+						this.vsItemDetails.selectedIndex = 5;
+						this.title = "Edit Goal";
+						break;
+					default:
+						this.vsItemDetails.selectedIndex = 6;
+						this.title = "Error " + this.editorType + " is not implemented";
+				}
+			}
+			// A reference to the TextInput control in which to put the result.
+			public var loginName:Text;
+			
+			// Event handler for the OK button.
+			private function returnName():void {
+				//loginName.text="Name entered: " + userName.text; 
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function onChangeItemName():void {
+				this.txtID.text = Util.getIDFromName(this.txtName.text);
+				this.treeSAN.selectedItem.@id = this.txtID.text;
+				this.treeSAN.selectedItem.@name = this.txtName.text;
+			}
+			/*
+			private function onChangeSitDialect():void {
+				this.treeSAN.selectedItem.@dialect = this.txtSitDialect.text;
+			}
+			private function onChangeSitExpr():void {
+				this.treeSAN.selectedItem.@definedBy = this.txtSitExpr.text;
+			}
+			*/
+			
+			private function onChangeConDialect():void {
+				this.treeSAN.selectedItem.@dialect = this.txtConDialect.text;
+			}
+			private function onChangeConExpr():void {
+				this.treeSAN.selectedItem.@definedBy = this.txtConExpr.text;
+			}						
+						
+		]]>
+	</mx:Script>
+	
+	<mx:VBox height="100%" width="100%">
+		<!--
+		<mx:Label id="lblItemType" text=""  fontWeight="bold" fontFamily="Verdana" fontSize="11" width="100%"/>		
+		-->
+		<mx:Form width="100%" cornerRadius="5" borderColor="#FFFFFF" borderStyle="none">			
+			<mx:FormItem label="ID (URI)" width="100%">
+				<mx:TextInput id="txtID"  width="100%"
+							  text="{treeSAN.selectedItem.@id}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Name" width="100%">
+				<mx:TextInput id="txtName"  width="100%" 
+							  text="{treeSAN.selectedItem.@name}" 
+							  change="onChangeItemName()" />
+			</mx:FormItem>			
+		</mx:Form>
+		<mx:HRule width="100%" />
+		<mx:ViewStack id="vsItemDetails" height="100%" width="100%" creationPolicy="all">
+			<editors:SANActionTypeEditor id="actionEditor" width="100%" height="100%"  borderStyle="solid" 
+									   cornerRadius="5" borderColor="#FDFDFD" borderThickness="1"/>
+			<editors:SituationEditor id="situationEditor" width="100%" height="100%"  borderStyle="solid" 
+									 cornerRadius="5" borderColor="#FDFDFD" borderThickness="1" />
+			<!--
+			<mx:VBox id="vbSituation" height="100%" width="100%">
+				<mx:Form width="100%">
+					<mx:FormItem label="Dialect" width="100%">
+						<mx:TextInput id="txtSitDialect" width="100"
+							change="onChangeSitDialect()"
+							text="{treeSAN.selectedItem.@dialect}"
+							/>
+					</mx:FormItem>
+					<mx:FormItem label="Expression" width="100%">
+						<mx:TextArea id="txtSitExpr" height="100" width="100%"
+							change="onChangeSitExpr()"
+							text="{treeSAN.selectedItem.@definedBy}" 
+									 />
+					</mx:FormItem>
+					<mx:FormItem label="" width="100%">
+						<mx:HBox width="100%">												
+							<mx:Button label="Validate" click="{Alert.show(this.sanXML.toXMLString() ) }" />
+							<mx:Button label="Clear" click="{treeSAN.selectedItem.@definedBy=''}" />
+						</mx:HBox>
+					</mx:FormItem>
+				</mx:Form>
+			</mx:VBox>
+			-->
+			<mx:VBox id="vbCondition" height="100%" width="100%">
+				<mx:Form width="100%">
+					<mx:FormItem label="Dialect" width="100%">
+						<mx:TextInput id="txtConDialect" width="100"
+									  change="onChangeConDialect()"
+									  text="{treeSAN.selectedItem.@dialect}"
+									  />
+					</mx:FormItem>
+					<mx:FormItem label="Expression" width="100%">
+						<mx:TextArea id="txtConExpr" height="100" width="100%"
+									 change="onChangeConExpr()"
+									 text="{treeSAN.selectedItem.@definedBy}" 
+									 />
+					</mx:FormItem>
+					<mx:FormItem label="" width="100%">
+						<mx:HBox width="100%">												
+							<mx:Button label="Validate" click="{Alert.show((treeSAN.selectedItem as XML).toString() ) }" />
+							<mx:Button label="Clear" click="{treeSAN.selectedItem.@definedBy=''}" />
+						</mx:HBox>
+					</mx:FormItem>
+				</mx:Form>
+			</mx:VBox>
+			
+			<editors:SANDecoratorTypeEditor id="decorEditor" width="100%" height="100%" />
+			
+			<mx:VBox id="vbActionPool" height="100%" width="100%" >
+				
+			</mx:VBox>
+			<mx:VBox id="vbGoal" height="100%" width="100%">
+				
+			</mx:VBox>
+			<mx:VBox id="vbErrorNotImpl" height="100%" width="100%">
+				
+			</mx:VBox>
+		</mx:ViewStack>
+	</mx:VBox>
+	
+	<mx:HBox>
+		<mx:Button label="OK" click="returnName();"/>
+		<!--
+		<mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/>
+		-->
+	</mx:HBox>	
+</mx:TitleWindow>

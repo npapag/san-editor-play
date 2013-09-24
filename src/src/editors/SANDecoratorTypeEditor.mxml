@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import util.Util;
+			
+			import mx.controls.Alert;
+			
+			[Bindable]
+			public  var treeSAN:mx.controls.Tree;
+			[Bindable]
+			public var sanXML:XML;
+			
+			private var decors:XML = util.Util.decorList; 
+							
+			public function init():void {
+				//this.treeSAN = (parent as SANItemEditor).treeSAN;				
+				cmbDecorTypes.dataProvider = decors.Decor;						
+				cmbDecorTypes.labelField = "@name";
+				trace(treeSAN.selectedItem.@id);				
+				this.selectType(this.treeSAN.selectedItem.@type);
+				this.vstack.selectedIndex = 7; //empty 
+				switchDetailForm(this.treeSAN.selectedItem.@type);
+			}
+			
+			private function switchDetailForm(type:String):void {				
+				switch (type) {
+					case "Loop":
+						this.vstack.selectedIndex = 0;
+						break;
+					case "Counter":
+						this.vstack.selectedIndex = 1;
+						break;
+					case "Timer":
+						this.vstack.selectedIndex = 2;
+						break;
+					case "Print":
+						this.vstack.selectedIndex = 3;
+						break;
+					case "Break":
+						this.vstack.selectedIndex = 4;
+						break;
+					case "Success":
+						this.vstack.selectedIndex = 5;
+						break;
+					case "Failure":
+						this.vstack.selectedIndex = 6;
+						break;
+					case "ExceptionHandler":
+						this.vstack.selectedIndex = 7;
+						break;
+					case "Condition":
+						this.vstack.selectedIndex = 8;
+						break;
+					default:
+						this.vstack.selectedIndex = 9;
+						break;
+				}
+			}
+			
+			private function onChangeType(event:Event):void {
+				//label.text =event.currentTarget.selectedItem.label + " " + 
+				//Alert.show(event.currentTarget.selectedItem.@type);
+				if (event.currentTarget.selectedItem.@value!="empty") 
+					this.treeSAN.selectedItem.@type = event.currentTarget.selectedItem.@name;
+				else
+					this.treeSAN.selectedItem.@type = "";
+				//Alert.show(event.currentTarget.selectedItem.@type);
+				switchDetailForm(this.treeSAN.selectedItem.@type);
+			}
+			
+			private function selectType(type:String):void {
+				var idx:int = -1;
+				var found:Boolean = false;				
+				for each (var decor:XML in decors.Decor)
+				{
+					//total2 += prop.@quantity * prop.price;
+					idx++;
+					if (decor.@name == type) {
+						this.cmbDecorTypes.selectedIndex = idx;
+						found = true;
+						break;
+					}
+				} 				
+				if (!found) {					
+					this.cmbDecorTypes.selectedIndex = 0;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<!--
+	Decorators:	
+	Loop
+		loopConditionDialect
+		loopCondition	
+	Counter
+		counterVariable   (global,san,local)
+		counterStart
+		counterStep	
+	Timer
+		timeout
+		returnCode (SUCCESS,FAILURE)	
+	Print
+		message		
+	Break
+		message		
+	Success	
+	Failure	
+	ExceptionHandler
+		exceptionType
+		failoverJob	
+	-->
+	
+	<mx:Form width="100%">
+		<mx:FormItem label="Type" width="100%">			
+			<mx:ComboBox id="cmbDecorTypes" change="onChangeType(event)"  />
+		</mx:FormItem>					
+	</mx:Form>
+	<mx:ViewStack id="vstack" width="100%" height="100%">		
+		<mx:Form width="100%"><!-- 0 : Loop-->
+			<mx:FormItem label="Condition Dialect" width="100">							
+				<mx:TextInput id="txtLoopConditionDialect" width="100%"
+							  change="{this.treeSAN.selectedItem.@loopConditionDialect = this.txtLoopConditionDialect.text}"
+							  text="{this.treeSAN.selectedItem.@loopConditionDialect}"
+							  />												
+			</mx:FormItem>					
+			<mx:FormItem label="Condition" width="100%">							
+				<mx:TextArea id="txtLoopCondition" width="100%"
+							  change="{this.treeSAN.selectedItem.@loopCondition = this.txtLoopCondition.text}"
+							  text="{this.treeSAN.selectedItem.@loopCondition}"
+							  />												
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form width="100%"><!-- 1: Counter -->
+			<mx:FormItem label="Variable" width="150"> <!---TODO cmb: global,san,local -->
+				<mx:TextInput id="txtCounterVar" width="100%"
+							  change="{this.treeSAN.selectedItem.@counterVariable = this.txtCounterVar.text}"
+							  text="{this.treeSAN.selectedItem.@counterVariable}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Start" width="150">				
+				<mx:TextInput id="txtCounterStart" width="100%"
+							  change="{this.treeSAN.selectedItem.@counterStart = this.txtCounterStart.text}"
+							  text="{this.treeSAN.selectedItem.@counterStart}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Step" width="150">
+				<mx:TextInput id="txtCounterStep" width="100%"
+							  change="{this.treeSAN.selectedItem.@counterStep = this.txtCounterStep.text}"
+							  text="{this.treeSAN.selectedItem.@counterStep}"
+							  />
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form width="100%"><!-- 2: timer -->
+			<mx:FormItem label="Timeout" width="100%">				
+				<mx:TextInput id="txtTimeout" width="100"
+							  change="{this.treeSAN.selectedItem.@timeout = this.txtTimeout.text}"
+							  text="{this.treeSAN.selectedItem.@timeout}"
+							  />
+			</mx:FormItem>
+			<mx:FormItem label="Return Code" width="100%">
+				<mx:TextArea id="txtRetCode" width="100%"
+							  change="{this.treeSAN.selectedItem.@returnCode = this.txtRetCode.text}"
+							  text="{this.treeSAN.selectedItem.@returnCode}"
+							  />
+			</mx:FormItem>					
+		</mx:Form>
+		<mx:Form width="100%"><!-- 3: Print -->
+			<mx:FormItem label="Message" width="100%">
+				<mx:TextArea id="txtPrintMsg" width="100%"
+							  change="{this.treeSAN.selectedItem.@message = this.txtPrintMsg.text}"
+							  text="{this.treeSAN.selectedItem.@message}"
+							  />				
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form width="100%"><!-- 4: Break -->
+			<mx:FormItem label="Message" width="100%">
+				<mx:TextArea id="txtBreakMsg" width="100%"
+							 change="{this.treeSAN.selectedItem.@message = this.txtBreakMsg.text}"
+							 text="{this.treeSAN.selectedItem.@message}"
+							 />				
+			</mx:FormItem>
+		</mx:Form>		
+		<mx:Form><!-- 5 Success -->
+			<mx:FormItem label="Success" width="100%">								
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form><!-- 6 Failure -->
+			<mx:FormItem label="Failure" width="100%">								
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form width="100%"><!-- 7 Exception Handler -->
+			<mx:FormItem label="Exception Type" width="100%">
+				<mx:TextInput id="txtExeType" width="100%"
+							  change="{this.treeSAN.selectedItem.@exceptionType = this.txtExeType.text}"
+							  text="{this.treeSAN.selectedItem.@exceptionType}"
+							  />				
+			</mx:FormItem>
+			<mx:FormItem label="Failover Job" width="100%">
+				<mx:TextInput id="txtFailJob" width="100%"
+							  change="{this.treeSAN.selectedItem.@failoverJob = this.txtFailJob.text}"
+							  text="{this.treeSAN.selectedItem.@failoverJob}"
+							  />				
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form width="100%"><!-- 8 : Condition-->
+			<mx:FormItem label="Condition Dialect" width="100%">							
+				<mx:TextInput id="txtConditionConditionDialect" width="100%"
+							  change="{this.treeSAN.selectedItem.@conditionConditionDialect = this.txtConditionConditionDialect.text}"
+							  text="{this.treeSAN.selectedItem.@conditionConditionDialect}"
+							  />												
+			</mx:FormItem>					
+			<mx:FormItem label="Condition" width="100%">							
+				<mx:TextArea id="txtConditionCondition" width="100%"
+							 change="{this.treeSAN.selectedItem.@definedBy = this.txtConditionCondition.text}"
+							 text="{this.treeSAN.selectedItem.@definedBy}"
+							 />												
+			</mx:FormItem>
+		</mx:Form>
+		<mx:Form><!-- 9 Empty -->
+			<!-- empty form -->
+		</mx:Form>
+	</mx:ViewStack>	
+</mx:VBox>

@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns="*" 
+		   xmlns:primitive="org.un.cava.birdeye.ravis.assets.icons.primitives.*" 
+		   creationComplete="init()"
+		   width="120" height="50"
+		   >
+	<!--  
+	This is the SAN Node Renderer 
+	-->
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import editors.ViewerItemLabelEditor;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			[Embed(source="assets/database.png")]
+			private var APool:Class;						
+			
+			private var txt:TextField;
+			
+			private function init():void {				
+				var img:String = "";
+				var gtl:String = String(XML(this.data.data).@name);				
+				var component:UIComponent = new UIComponent();				
+				var sprite:Sprite = new Sprite();
+				var spriteIcon:Sprite = null;
+				
+				txt = new TextField();												
+				txt.maxChars = 50;				
+				txt.wordWrap = true;
+				txt.multiline = true;				
+				txt.autoSize = TextFieldAutoSize.CENTER;
+				txt.background = false;
+				txt.border = false;				
+				
+				var tf:TextFormat = new TextFormat();
+				tf.font = "Verdana";
+				tf.color = 0x000000;
+				tf.size = 9;
+				tf.underline = false;
+				tf.bold = true;
+				
+				tf.leading = 0; //line spacing				
+				txt.defaultTextFormat = tf;
+				txt.text = gtl;
+				txt.selectable = true;
+				txt.type = "input"; //makes the label editable
+				
+				switch (String(XML(this.data.data).@type)) {
+					case "san":
+						sprite.graphics.lineStyle(3,0x00b800);
+						sprite.graphics.beginFill(0xb8fdb5);
+						sprite.graphics.drawEllipse(0, 0, 140,40 );
+						sprite.graphics.endFill();
+						txt.x = 10; 
+						txt.y=4;
+						txt.width = 130;
+						txt.height = 40;
+						break;
+					case "action":
+						switch (String(this.data.data.@subtype)) {
+							case "ParallelAny":
+								txt.text +=" (//any)";
+								//white 
+								sprite.graphics.lineStyle(3,0x0000b8);
+								sprite.graphics.beginFill(0xffffff);
+								sprite.graphics.drawEllipse(0, 0, 140,40 );
+								sprite.graphics.endFill();								
+								txt.x = 10; 
+								txt.y =4;
+								txt.width = 125;
+								txt.height = 40;
+								break;
+							case "ParallelAll":
+								txt.text+=" (//all)";
+								//white 
+								sprite.graphics.lineStyle(3,0x0000b8);
+								sprite.graphics.beginFill(0xffffff);
+								sprite.graphics.drawEllipse(0, 0, 140,40 );
+								sprite.graphics.endFill();								
+								txt.x = 10; 
+								txt.y =4;
+								txt.width = 125;
+								txt.height = 40;
+								break;
+							case "Sequence":
+								txt.text+=" (->)";
+								//white 
+								sprite.graphics.lineStyle(3,0x0000b8);
+								sprite.graphics.beginFill(0xffffff);
+								sprite.graphics.drawEllipse(0, 0, 140,40 );
+								sprite.graphics.endFill();								
+								txt.x = 10; 
+								txt.y =4;
+								txt.width = 125;
+								txt.height = 40;
+								break;
+							case "Abstract":																 
+								sprite.graphics.lineStyle(3,0x00b800);
+								//sprite.graphics.lineStyle(10, 0x00D700, 1, false, LineScaleMode.VERTICAL,
+									//CapsStyle.NONE, JointStyle.MITER, 1);
+
+								sprite.graphics.beginFill(0xb8fdb5);
+								sprite.graphics.drawEllipse(0, 0, 140,40 );
+								sprite.graphics.endFill();
+								txt.x = 10; 
+								txt.y =4;
+								txt.width = 125;
+								txt.height = 40;
+								
+								spriteIcon = new Sprite(); 
+								var myBitmap:BitmapData = new APool().bitmapData;
+								spriteIcon.x = sprite.width - 40;
+								spriteIcon.y = sprite.height - 30;
+								spriteIcon.graphics.lineStyle(0,0x00b800,0);
+								spriteIcon.graphics.beginBitmapFill(myBitmap,null,false);
+								spriteIcon.graphics.drawRect(0, 0, myBitmap.width, myBitmap.height);
+								spriteIcon.graphics.endFill();								
+								
+								break;
+							default:
+								// green
+								sprite.graphics.lineStyle(3,0x00b800);
+								sprite.graphics.beginFill(0xb8fdb5);
+								sprite.graphics.drawEllipse(0, 0, 140,40 );
+								sprite.graphics.endFill();
+								txt.x = 10; 
+								txt.y =4;
+								txt.width = 125;
+								txt.height = 40;
+								break;
+						}						
+						break;
+					case "Goal":
+						sprite.graphics.lineStyle(3,0xa71100);
+						sprite.graphics.beginFill(0xf7e5e5);
+						sprite.graphics.drawRect(0, 0, 140,40 );
+						sprite.graphics.endFill();						
+						gtl +=  "\nSituation: " + String(XML(this.data.data).@sitName) +  
+						"\nCondition: " + String(XML(this.data.data).@conName) ;
+						trace("gtl="+gtl+"\n");
+						txt.x = 10; 
+						txt.y = 0;
+						txt.width = 130;
+						txt.height = 40;
+						break;
+					case "Condition": 
+						// draw a side rectangle
+						var commands:Vector.<int> = new Vector.<int>(5, true);
+						commands[0] = GraphicsPathCommand.MOVE_TO;
+						commands[1] = GraphicsPathCommand.LINE_TO;
+						commands[2] = GraphicsPathCommand.LINE_TO;
+						commands[3] = GraphicsPathCommand.LINE_TO;
+						commands[4] = GraphicsPathCommand.LINE_TO;
+						
+						var data:Vector.<Number> = new Vector.<Number>(10, true);
+						var rwidth:int =130;
+						var rheight:int = 40;
+						data[0] = 10; // x
+						data[1] = 0; // y
+						data[2] = 10 + rwidth; 
+						data[3] = 0;
+						data[4] = rwidth;
+						data[5] = rheight;
+						data[6] = 0;
+						data[7] = rheight;
+						data[8] = 10;
+						data[9] = 0;
+						sprite.graphics.lineStyle(3,0x852627);
+						sprite.graphics.beginFill(0xb686da);
+						sprite.graphics.drawPath(commands,data );
+						sprite.graphics.endFill();
+						txt.x = 10; 
+						txt.y=4;
+						txt.width = 130;
+						txt.height = 40;
+						break;
+					case "Situation":						
+						sprite.graphics.lineStyle(3,0x00487e);
+						sprite.graphics.beginFill(0xb3ccff);
+						sprite.graphics.drawEllipse(0, 0, 140,40 );
+						sprite.graphics.endFill();
+						txt.x = 10; 
+						txt.y =4;
+						txt.width = 125;
+						txt.height = 40;
+						break;
+					default:
+						sprite.graphics.lineStyle(3,0x00b8ff);
+						sprite.graphics.beginFill(0xffffff);
+						sprite.graphics.drawEllipse(0, 0, 140,40 );
+						sprite.graphics.endFill();
+						txt.x = 10; 
+						txt.y =4;
+						txt.width = 125;
+						txt.height = 40;
+						//img = "";
+				}
+				component.addChild(sprite);
+				if (spriteIcon!=null) component.addChild(spriteIcon);
+				component.addChild(txt);
+				txt.defaultTextFormat = tf;
+				
+				gtl =  "<font color='#ffffaa' size='+1'><b>" + (this.data.data).@type + "</b></font> \n" ;
+				if (String((this.data.data).@subtype).length>0)
+				gtl += "Type : " + (this.data.data).@subtype + "\n" ; 
+				gtl += "ID : " + (this.data.data).@node_id + "\n" ;				
+				gtl += "Name : " + (this.data.data).@name + "\n" ;
+				gtl += "<br><font color='#00abab'><i>Right click to edit</i></font></br>";
+				
+				/* example
+				tip1 = "<font color='#076baa' size='+4'><b>Easily style your tooltips:</b></font><br><br>";
+				tip1 += "<i>Italic</i>, <b>Bold</b>, <i><b>Bold+Italic</b></i>, <u>Underlined</u>, ...<br>";
+				tip1 += "<br><font color='#FF0000'><b>Choose your favorite color</b></font><br>";
+				tip1 += "<br><font size='24'>Use a big font size</font><br>";
+				tip1 += "<font size='6'>or a very small one</font>";
+				*/
+				
+				component.toolTip = gtl;
+				
+				//component.addEventListener(MouseEvent.DOUBLE_CLICK,onDoubleClick);
+				
+				//RIGHT CLICK CONTEXT MENU (Open Editor)
+				this.addChild(component);
+				
+				var editMenuItem:ContextMenuItem = new ContextMenuItem("Edit " + String(XML(this.data.data).@type) );												
+				editMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, menuEditHandler);
+				
+				var menu:ContextMenu = new ContextMenu();   
+				menu.hideBuiltInItems(); //hide flash menu  
+				menu.customItems.push(editMenuItem);    
+				this.contextMenu = menu;												
+			}
+			
+			function menuEditHandler(event:ContextMenuEvent) : void{
+				trace(event);
+				//mx.controls.Alert.show("You clicked on menu entry " + event.currentTarget.caption);
+				/* tested works :
+				Alert.show(
+					String(XML(this.data.data).@node_id) + "\n" +
+					String(XML(this.data.data).@name)+ "\n" +
+					String(XML(this.data.data).@type) + "\n" +
+					String(XML(this.data.data).@subtype) + "\n" + 
+					parentDocument._sanXML
+				); 
+				var nodeid:String = XML(this.data.data).@node_id;
+				var newtext:String = this.data.data.@name + "-modified from view";
+				this.txt.text = newtext;
+				this.data.data.@name = newtext;
+				//(parentDocument._sanXML as XML).san[0]..s[@id==nodeid]
+				var targetItem:XMLList = //(parentDocument._sanXML as XML).san[0]..s.(@id == nodeid ) ;
+					(parentDocument._sanXML as XML).san[0].descendants().(attribute("id") == nodeid);				
+				targetItem.@name = newtext;
+				*/
+				var nodeid:String = XML(this.data.data).@node_id;
+				var win:ViewerItemLabelEditor=ViewerItemLabelEditor(PopUpManager.createPopUp( 
+					this, ViewerItemLabelEditor , true));
+				win.init(nodeid,parentDocument._sanXML,this.data.data, this.txt);
+				PopUpManager.centerPopUp(win);
+				//win.sanXML = parentDocument._sanXML;
+				//win.parent_data = this.data.data;
+			}
+			
+			private function onDoubleClick(e:Event):void {
+				Alert.show(
+					String(XML(this.data.data).@id) + "\n" +
+					String(XML(this.data.data).@name)+ "\n" +
+					String(XML(this.data.data).@type) + "\n" +
+					String(XML(this.data.data).@subtype)
+				);
+			}
+			
+			private function showDetails(event:Event):void{
+				parentDocument.nodeID.text=this.data.data.@id;
+				parentDocument.nodeName.text=this.data.data.@name;
+				parentDocument.nodeDesc.text=this.data.data.@desc;
+			}
+			
+			private function nodeTextClickListerner(e:MouseEvent):void {
+				//(e.target as TextField).type = "input";
+				trace("nodeTextClickListerner:\t" + XML(this.data.data).@node_id + "\t" + 
+					String(XML(this.data.data).@id) + "\t" +
+					String(XML(this.data.data).@name)+ "\t" +
+					String(XML(this.data.data).@type) + "\t" +
+					String(XML(this.data.data).@subtype)
+ 				);
+			}
+		]]>
+	</mx:Script>	
+</mx:Canvas>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns="*" 
+		   xmlns:primitive="org.un.cava.birdeye.ravis.assets.icons.primitives.*" 
+		   creationComplete="init()"
+		   >	
+	<!-- 
+		This is the SAN Node Renderer 
+	-->
+	
+	<mx:Canvas id="node"  width="120"   height="45"
+				 cornerRadius="13" borderStyle="solid" 
+				 borderColor="#535557" backgroundColor="#9F9494" 
+				 color="#561805" fontWeight="bold" >
+		
+		<mx:Text id="nodeText" text="{XML(this.data.data).@name}"
+				 width="100%"
+				 height="100%"  
+				 textAlign="left" fontSize="9" 
+				  x="2" y="2"/>
+		<!--
+		width="{String(XML(this.data.data).@name).length*8+10}" 
+		height="11"
+		-->
+	</mx:Canvas>
+	
+	<mx:Script>
+		<![CDATA[
+			
+			[Embed(source="assets/san32.png")]
+			[Bindable]
+			public var sanCls:Class;
+			
+			[Embed(source="assets/a16.png")]
+			[Bindable]
+			public var actionCls:Class;
+			
+			[Embed(source="assets/g16.png")]
+			[Bindable]
+			public var goalCls:Class;
+			
+			[Embed(source="assets/c16.png")]
+			[Bindable]
+			public var condCls:Class;
+			
+			[Embed(source="assets/s16.png")]
+			[Bindable]
+			public var sitCls:Class;
+			
+			private function init():void {
+				
+				//var nodeColor:int = this.data.data.@nodeColor;
+				//var nodeSize:int = this.data.data.@nodeSize;
+				var img:String = "";
+				var gtl:String = "";
+				
+				//this.image.width = 0; //22; 
+				//this.image.height = 0; //22;
+				
+				gtl = String(XML(this.data.data).@name);
+					
+				switch (String(XML(this.data.data).@type)) {
+					case "san":
+						//this.image.source = sanCls;
+						break;
+					case "action":						
+						//this.image.source = actionCls;						
+						node.setStyle("backgroundColor", 0xb8fdb5);
+						
+						break;
+					case "goal":
+						//this.image.source = goalCls;
+						node.setStyle("backgroundColor", 0xf7e5e5);
+						gtl =  "Situation: " + String(XML(this.data.data).@sitName) +  
+							"\nCondition: " + String(XML(this.data.data).@conName) ;
+						trace("gtl="+gtl+"\n");
+						//this.image.width 	= 20;
+						//this.image.height 	= 20;
+						break;
+					case "Condition":						
+						//this.image.source = condCls;
+						node.setStyle("backgroundColor", 0xb686da);
+						break;
+					case "Situation":						
+						//this.image.source = sitCls;
+						node.setStyle("backgroundColor", 0xb3ccff);
+						break;
+					default:
+						img = "";
+				}
+				this.node.toolTip = gtl;
+				//this.image.load(img);
+				
+			}
+			
+			private function showDetails(event:Event):void{
+				parentDocument.nodeID.text=this.data.data.@id;
+				parentDocument.nodeName.text=this.data.data.@name;
+				parentDocument.nodeDesc.text=this.data.data.@desc;
+			}
+		]]>
+	</mx:Script>	
+</mx:Canvas>

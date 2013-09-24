@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import editors.PropertyItemEditor;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Tree;
+			import mx.controls.listClasses.IDropInListItemRenderer;
+			import mx.events.DataGridEvent;
+			import mx.managers.CursorManager;
+			import util.*;
+			
+			private var itemProperties:ArrayCollection;
+			
+			[Bindable]
+			public var treeSAN:Tree;
+			[Bindable]
+			public var sanXML:XML;
+			
+			[Bindable] var criterialList:XMLList;
+			
+			[Bindable] var selectedSANIndex:int = -1;
+			
+			public function init():void {
+				this.treeSAN.addEventListener(Event.CHANGE,onTreeChange);
+				//this.dgrid.columns[0].width = 110;
+			}
+			
+			private function onTreeChange(e:Event):void {
+				trace("property-grid change");				
+				CursorManager.setBusyCursor();
+				//Alert.show((this.treeSAN.selectedItem as XML).@name);
+				populateProperties();
+				CursorManager.removeBusyCursor();
+				
+			}
+			
+			private function populateProperties():void {				
+				var xml:XML = (this.treeSAN.selectedItem as XML);
+				this.dgrid.dataProvider = null;
+				itemProperties = new ArrayCollection();
+				itemProperties.addItem({name:"Id",value: xml.@id, attr:"id",type:"text"});
+				itemProperties.addItem({name:"Name",value: xml.@name, attr:"name",type:"text"});
+				switch (xml.localName()) {
+					case "g":
+						if (xml.@type=="root")
+							itemProperties.addItem({name:"Autostart",value: xml.@autostart, attr:"autostart",type:"chbState"});
+						break;
+					case "s":
+						itemProperties.addItem({name:"Dialect",value: xml.@dialect, attr:"dialect",type:"text"});
+						itemProperties.addItem({name:"Expression",value: xml.@definedBy, attr:"definedBy",type:"text"});
+						break;
+					case "c":
+						itemProperties.addItem({name:"Dialect",value: xml.@dialect, attr:"dialect",type:"text"});
+						//TODO:type:expr
+						itemProperties.addItem({name:"Expression",value: xml.@definedBy, attr:"definedBy",type:"text"});
+						break;
+					case "a":
+						itemProperties.addItem({name:"Type",value: xml.@type, attr:"type",type:"actionType"});
+						var type:String = xml.@type;
+						switch (type) {
+							case "Primitive":
+								itemProperties.addItem({name:"Command",value: xml.@command, attr:"command",type:"text"});
+								itemProperties.addItem({name:"Dialect",value: xml.@dialect, attr:"dialect",type:"text"});
+								itemProperties.addItem({name:"Expression",value: xml.@definedBy, attr:"definedBy",type:"text"});
+								break;
+							case "Abstract":
+								//actionPool,selectionMethod
+								itemProperties.addItem({name:"Action Pool",value: xml.@actionPool, attr:"actionPool",type:"text"});								
+								itemProperties.addItem({name:"Sel. Method Configuration",value: xml.@selectionMethodConfig, attr:"selectionMethodConfig",type:"text"});
+								//itemProperties.addItem({name:"Resolution Policy",value: xml.@resolutionPolicy, attr:"resolutionPolicy",type:"text"});
+								itemProperties.addItem({name:"Resolution Policy",value: xml.@resolutionPolicy, attr:"resolutionPolicy",type:"rpolicyType"});
+								//itemProperties.addItem({name:"Selection Method",value: xml.@selectionMethod, attr:"selectionMethod",type:"text"});
+								itemProperties.addItem({name:"Selection Method",value: xml.@selectionMethod, attr:"selectionMethod",type:"smethodType"});
+								var type:String = xml.@selectionMethod;
+								switch (type) {
+									/*
+									case "LOWA":
+										itemProperties.addItem({name:"Dialect",value: xml.@loopConditionDialect, attr:"loopConditionDialect",type:"text"});
+										itemProperties.addItem({name:"Expression",value: xml.@loopCondition, attr:"loopCondition",type:"text"});								
+										break;
+									*/
+								}
+								break;
+							case "Calculation":
+								itemProperties.addItem({name:"Dialect",value: xml.@dialect, attr:"dialect",type:"text"});
+								itemProperties.addItem({name:"Expression",value: xml.@definedBy, attr:"definedBy",type:"text"});
+								break;
+							case "Mount":
+								itemProperties.addItem({name:"SAN",value: xml.@mountSAN, attr:"mountSAN",type:"text"});								
+								break;
+							case "Sequence":
+								//itemProperties.addItem({name:"Selection Method",value: xml.@selectionMethod, attr:"selectionMethod",type:"text"});
+								break;
+							case "Selector":
+								itemProperties.addItem({name:"Selection Method",value: xml.@selectionMethod, attr:"selectionMethod",type:"text"});
+								break;
+							case "ParallelAny":
+								
+								break;
+							case "ParallelAll":
+								
+								break;
+							default:								
+								break;
+						}
+						break;
+					case "d":
+						itemProperties.addItem({name:"Type",value: xml.@type, attr:"type",type:"decorType"});
+						var type:String = xml.@type;
+						switch (type) {
+							case "Loop":
+								itemProperties.addItem({name:"Dialect",value: xml.@loopConditionDialect, attr:"loopConditionDialect",type:"text"});
+								itemProperties.addItem({name:"Expression",value: xml.@loopCondition, attr:"loopCondition",type:"text"});								
+								break;
+							case "Counter":								
+								itemProperties.addItem({name:"Variable",value: xml.@counterVariable, attr:"counterVariable",type:"text"});
+								itemProperties.addItem({name:"Start",value: xml.@counterStart, attr:"counterStart",type:"text"});
+								itemProperties.addItem({name:"Step",value: xml.@counterStep, attr:"counterStep",type:"text"});
+								break;
+							case "Timer":
+								itemProperties.addItem({name:"Timeout",value: xml.@timeout, attr:"timeout",type:"text"});
+								itemProperties.addItem({name:"Return Code",value: xml.@returnCode, attr:"returnCode",type:"text"});																
+								break;
+							case "Print":
+								itemProperties.addItem({name:"Message",value: xml.@message, attr:"message",type:"text"});
+								break;
+							case "Break":																
+								itemProperties.addItem({name:"Message",value: xml.@message, attr:"message",type:"text"});
+								break;
+							case "Success":								
+								break;
+							case "Failure":								
+								break;
+							case "ExceptionHandler":								
+								itemProperties.addItem({name:"Exception Type",value: xml.@exceptionType, attr:"exceptionType",type:"text"});
+								itemProperties.addItem({name:"Failover Job",value: xml.@failoverJob, attr:"failoverJob",type:"text"});
+								break;
+							default:
+								//n3.n3str += triple(ID(node.@id), "a","san:ExceptionHandlerDecorator",false);
+								break;
+						}
+						break;
+				}
+				this.dgrid.dataProvider = itemProperties;				
+			}
+			
+			// Handle the itemEditBegin event.
+			private function modifyEditedData(event:DataGridEvent):void
+			{
+				// Get the name of the column being editted.
+				var colName:String = dgrid.columns[event.columnIndex].dataField;
+				var colAttr:String = dgrid.selectedItem.attr;
+				
+				var item:XML = (this.treeSAN.selectedItem as XML);
+				if (item == null) return;
+				if(colName=="value")
+				{
+					// Disable copying data back to the control.
+					event.preventDefault();
+					
+					dgrid.editedItemRenderer.data.value =
+						String(editors.PropertyItemEditor(dgrid.itemEditorInstance).editorValue);
+					//dgrid.editedItemRenderer.data.State=
+					//myEditor(dgrid.itemEditorInstance).pickState.selectedItem;
+					
+					//update the SAN
+					//(this.treeSAN.selectedItem as XML).@[colAttr] = dgrid.editedItemRenderer.data.value;
+					//or
+					this.sanXML.descendants(item.localName()).(@id == item.@id).@[colAttr] 
+						= dgrid.editedItemRenderer.data.value;
+					if (colAttr=="name") {
+						this.sanXML.descendants(item.localName()).(@id == item.@id).@["id"] =
+						util.Util.getIDFromName(dgrid.editedItemRenderer.data.value);
+					}
+					
+					dgrid.destroyItemEditor();
+					
+					// Notify the list control to update its display.
+					dgrid.dataProvider.itemUpdated(dgrid.editedItemRenderer);
+					populateProperties(); // not optimal - TODO update only type properties?
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:DataGrid id="dgrid" height="100%" width="100%" editable="true"
+				 itemEditEnd="modifyEditedData(event);" 
+				 >
+		<mx:columns>
+			<mx:DataGridColumn dataField="name" headerText="Parameter"
+							   width="110" resizable="true" editable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label truncateToFit="true" fontWeight="bold" />
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="value" headerText="Value" editorDataField="editorValue"
+							   itemEditor="{new ClassFactory(editors.PropertyItemEditor)}"
+							   editable="true">				
+			</mx:DataGridColumn>
+		</mx:columns>		
+	</mx:DataGrid>
+</mx:VBox>

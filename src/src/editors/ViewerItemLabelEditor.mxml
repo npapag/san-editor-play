@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" label="Edit"
+				close="onCancel" borderAlpha="0.99" xmlns:local="*" xmlns:editors="editors.*"
+				layout="vertical" width="300" height="200">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var sanXML:XML;
+			private var parent_data:Object;
+			private var node_id;
+			private var ptxt:TextField;
+						
+			public function init(_nodeid:String,_sanXML:XML,_data:Object,_ptxt:TextField):void {
+				this.sanXML = _sanXML;
+				this.parent_data = _data;
+				this.node_id = _nodeid;
+				this.txt.text = (parent_data as XML).@name;
+				this.ptxt = _ptxt;
+			}
+			
+			private function onUpdate(e:Event):void {
+				var nodeid:String = XML(parent_data).@node_id;
+								
+				//(parentDocument._sanXML as XML).san[0]..s[@id==nodeid]
+				var targetItem:XMLList = //(parentDocument._sanXML as XML).san[0]..s.(@id == nodeid ) ;
+					sanXML.san[0].descendants().(attribute("id") == node_id);				
+				targetItem.@name = this.txt.text; //update XML
+				parent_data.@name = this.txt.text; //update model;
+				ptxt.text = this.txt.text;
+				PopUpManager.removePopUp(this);
+			}
+			private function onCancel(e:Event):void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:TextArea id="txt" text=""  width="100%" height="100%" />
+	
+	<mx:ControlBar>
+		<mx:Button label="Update" click="onUpdate(event)" />
+		<mx:Button label="Cancel" click="onCancel(event)" />				
+	</mx:ControlBar>
+		
+</mx:TitleWindow>

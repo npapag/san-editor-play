@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();" resize="resize(event);" >
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.controls.Tree;
+			import mx.core.Application;
+			import mx.managers.CursorManager;
+			
+			[Bindable]
+			public var entityXML:XML;			
+			[Bindable]
+			public var entityTree:Tree;
+			
+			[Bindable]
+			private var item:XML = null;
+			
+			public function init():void {
+				this.entityTree.addEventListener(Event.CHANGE,onTreeChange);				
+			}
+			
+			private function resize(e:Event):void {
+				trace("resize event : " + e);
+				this.height = Application.application.vboxMAIN.height - 100;
+			}
+			
+			private function onTreeChange(e:Event):void {
+				trace("entity tree change: meta-data editor");				
+				CursorManager.setBusyCursor();
+				item = (this.entityTree.selectedItem as XML);
+				trace(this+" : " + item.localName());
+				switch (item.localName()) {				
+					case "context":						
+						setEnabled(false); 
+						break;					
+					case "sans":						
+						setEnabled(false); 
+						break;
+					case "san":						
+						setEnabled(false);						
+						break;
+					default:
+						setEnabled(true);						
+				}
+				refresh();
+				CursorManager.removeBusyCursor();				
+			}
+			
+			private function setEnabled(enabled:Boolean):void {
+				this.dgrid.enabled = enabled;
+				this.btAddMeta.enabled = enabled;
+				if (!enabled) 
+					this.lblMessage.text = "Cannot add metadata on this node.";
+				else 
+					this.lblMessage.text= 'Selected node :' + (this.entityTree.selectedItem as XML).@name ;
+			}
+			
+			private function refresh():void {
+				this.dgrid.dataProvider = (item.meta as XMLList);//re-bind datagrid
+				trace("entity tree item meta-data");
+				trace(item.meta);
+			}
+			
+			public function deleteItem(e:Event):void {				
+				var target_id:String = null; 
+				target_id = this.dgrid.selectedItem.@id;
+				if (target_id==null) {Alert.show("Please select an attribte from the list."); return; }; 
+				if (item!=null) {					                	            
+					var children:XMLList = XMLList(item.children());
+					for(var i:Number=0; i < children.length(); i++) {
+						if( children[i].@id == target_id ) {
+							delete children[i];            	
+						}
+					}//for
+				}//if
+				refresh();
+				trace("Delete");
+			}
+			
+			private function onAdd():void {
+				var _id:String = Application.application.server.getNewIDWithPrefix("meta");
+				var newAttr:XML = <meta id={_id} name={item.@name+"MetaName"} type="Type" value="value" rangemin="0" rangemax="100" step="1" units="" metaexpr="" />
+				this.item.appendChild(newAttr);
+				refresh();
+				trace("Add :"+ newAttr.toXMLString());
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:ControlBar id="controlBar1" width="100%" horizontalAlign="left" >
+		<!--<mx:Label text="Meta-data Editor" />-->
+		<mx:Button id="btAddMeta" label="Add meta" click="onAdd()"/>			
+		<mx:Label id="lblMessage"  />
+	</mx:ControlBar>
+	
+	<mx:DataGrid id="dgrid" height="100%" width="100%" editable="true">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="@id"
+							   width="110" resizable="true" editable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label truncateToFit="true" fontWeight="bold" />
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@name" headerText="Name" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@type" headerText="Type" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@units" headerText="Units" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@value" headerText="Value" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@metaexpr" headerText="Expression" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@rangemin" headerText="Range Min" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@rangemax" headerText="Range Max" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@step" headerText="Range Step" 									   							   
+							   editable="true">				
+			</mx:DataGridColumn>			
+			
+			<mx:DataGridColumn headerText="Action" width="100">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:LinkButton label="Delete"
+									   click="{outerDocument.deleteItem(event)}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>		
+	</mx:DataGrid>
+	
+</mx:VBox>

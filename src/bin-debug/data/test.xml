@@ -1,0 +1,20 @@
+<Graph>
+  <Node id="1" name="t0" desc="t0" nodeColor="0x333333" nodeSize="20" />    
+  <Node id="2" name="s0" desc="s0" nodeColor="0x00F000" nodeSize="20" />
+  <Node id="3" name="c0" desc="c0" nodeColor="0xF00000" nodeSize="20" />
+  <Node id="4" name="a0" desc="a0" nodeColor="0x0000F0" nodeSize="20"  />
+  
+  <Node id="t1" name="t1" desc="t1" nodeColor="0x333333" nodeSize="20" />    
+  <Node id="6" name="s1" desc="s2" nodeColor="0x00F000" nodeSize="20" />
+  <Node id="7" name="c1" desc="c3" nodeColor="0xF00000" nodeSize="20" />
+  <Node id="8" name="a1" desc="a4" nodeColor="0x0000F0" nodeSize="20"  />  
+      
+  <Edge fromID="1" toID="2" edgeLabel="situation" flow="0" color="blue" />
+  <Edge fromID="1" toID="3" edgeLabel="condition" flow="0" color="green" />
+  <Edge fromID="1" toID="4" edgeLabel="action" flow="0" color="0xcd5c5c"  />
+  
+  <Edge fromID="1" toID="t1" edgeLabel="" flow="0" color="0xcd5c5c"  />
+  <Edge fromID="t1" toID="6" edgeLabel="s" flow="0" color="0xcd5c5c"  />
+  <Edge fromID="t1" toID="7" edgeLabel="c" flow="0" color="0xcd5c5c"  />
+  <Edge fromID="t1" toID="8" edgeLabel="a" flow="0" color="0xcd5c5c"  />    
+</Graph>

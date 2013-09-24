@@ -1,0 +1,24 @@
+<config>
+	<SelectionMethods>											
+		<SMethod name="Select" value="empty"/>
+		<SMethod name="LOWA" value="LOWA"/>												
+		<SMethod name="SMART" value="SMART"/>		
+	</SelectionMethods>
+	<ResolutionPolicies>                                                                                                                        
+		<RPolicy name="Select" value="empty"/>
+		<RPolicy name="ONE FIRST (Executes the first job in the results list)" value="ONE_FIRST"/>                                                                                                                                         
+		<RPolicy name="ONE RANDOM (Executes a random job from the results list)" value="ONE_RANDOM"/>                
+		<RPolicy name="PARALLEL ANY (Executes all jobs in result list under a PARALLEL ANY node)" value="PARALLEL_ANY"/>                   
+		<RPolicy name="PARALLEL ALL (Executes all jobs in result list under a PARALLEL ALL node)" value="PARALLEL_ALL"/>                    
+		<RPolicy name="PARALLEL TIMEOUT (Executes all jobs in result list under a PARALLEL TIMEOUT node)" value="PARALLEL_TIMEOUT"/>                       
+	</ResolutionPolicies>
+	<CriteriaTypes>
+		<Type name="STRING" value="STRING" />
+		<Type name="NUMBER" value="NUMBER" />
+	</CriteriaTypes>
+	<CriteriaDirections>
+		<Direction name="N/A" value="N/A" />
+		<Direction name="INC" value="INC" />
+		<Direction name="DEC" value="DEC" />
+	</CriteriaDirections>
+</config>

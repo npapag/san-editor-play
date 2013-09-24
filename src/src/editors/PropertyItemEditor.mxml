@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+		 width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		 >
+	<mx:Script>
+		<![CDATA[
+			import mx.containers.Panel;
+			import mx.managers.PopUpManager;
+			import mx.core.Application;
+			
+			import util.Util;
+			[Bindable]
+			private var myValue:String ;
+									
+			public function get editorValue() : String
+			{
+				return myValue;
+			}
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				//part1.text = value.ccard.substr(0,4);
+				myValue = value.value;
+				this.currentState = getCurrentState();
+				
+			}
+			
+			private function getCurrentState():String {
+				return data.type;
+				//return (data.type) == 'bool' ? 'checkboxState' : 'baseState';
+			}
+			
+			//action type handling
+			private function onActionTypeChange(e:Event):void {
+				this.myValue = this.cmbActionType.selectedItem.@name;
+			}
+			
+			private function getSelectedActionIndex():int {
+				var i:int = 0;
+				for each (var act:XML in util.Util.actionList.Action) {
+					if (act.@name == myValue) return i;
+					i++;
+				}
+				return 0;
+			}
+			
+			//decorator type handling
+			private function onDecorTypeChange(e:Event):void {
+				this.myValue = this.cmbDecorType.selectedItem.@name;
+			}
+			//Abstract action selection method
+			//selection method type handling
+			private function onSMethodTypeChange(e:Event):void {
+				this.myValue = this.cmbSMethodType.selectedItem.@value;
+			}
+			//Abstract action selection method
+			private function getSelectedSMethodIndex():int {
+				var i:int = 0;
+				
+				for each (var met:XML in Application.application.appStaticDataXML.SelectionMethods.SMethod) {
+					if (met.@name == myValue) return i;
+					i++;
+				}				
+				return 0;
+			}
+			
+			//selection method type handling
+			private function onRPolicyTypeChange(e:Event):void {
+				this.myValue = this.cmbRPolicyType.selectedItem.@value;
+			}
+			//Abstract action resolution policy
+			private function getSelectedRPolicyIndex():int {
+				var i:int = 0;
+				
+				for each (var item:XML in Application.application.appStaticDataXML.ResolutionPolicies.RPolicy) {
+					if (item.@name == myValue) return i;
+					i++;
+				}				
+				return 0;
+			}
+			
+			private function getSelectedDecorIndex():int {
+				var i:int = 0;
+				for each (var act:XML in util.Util.decorList.Decor) {
+					if (act.@name == myValue) return i;
+					i++;
+				}
+				return 0;
+			}
+						
+			
+			//expression edit
+			private function onEditExpr():void {				
+				var win:ExpressionWindow = 
+					ExpressionWindow(PopUpManager.createPopUp( this, ExpressionWindow , true));
+				win.init(this.myValue,""); //how to find type ?
+			}
+			
+			//Checkbox : yes - no
+			private function getChkStateSelected():Boolean {				
+				var ret:Boolean = false;
+				if (myValue=="yes") 
+					ret = true;								
+				return ret;
+			}
+			
+			private function onChkStateChange(event:Event):void {				
+				if (this.chkState.selected) 
+					myValue="yes";
+				else  
+					myValue="no";				
+			}
+			
+		]]>
+	</mx:Script>
+
+	<mx:states>
+		<mx:State name="text">
+			<mx:AddChild>
+				<!--
+				<mx:Label truncateToFit="true" text="{data.value}" paddingLeft="2" />
+				-->
+				<mx:TextInput id="txtValue" width="100%" text="{myValue}" paddingLeft="2" 
+							  change="{this.myValue = this.txtValue.text}" />
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="chbState">
+			<mx:AddChild>
+				<!--
+					<mx:CheckBox selected="{data.value &amp;&amp; parseInt(data.value)}" paddingLeft="5" />
+				-->
+				<mx:CheckBox id="chkState" 
+							 selected="{getChkStateSelected()}"
+							 change="{onChkStateChange(event)}"
+							 paddingLeft="5" />
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="actionType">
+			<mx:AddChild>
+				<mx:ComboBox id="cmbActionType"  width="100%"
+							 selectedIndex="{getSelectedActionIndex()}"
+							 dataProvider="{util.Util.actionList.Action}"
+							 change="onActionTypeChange(event);"
+							 labelField="@name"
+					/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="decorType">
+			<mx:AddChild>
+				<mx:ComboBox id="cmbDecorType"  width="100%"
+							 selectedIndex="{getSelectedDecorIndex()}"
+							 dataProvider="{util.Util.decorList.Decor}"
+							 change="onDecorTypeChange(event);"
+							 labelField="@name"
+							 />
+			</mx:AddChild>
+		</mx:State>
+		<!-- 
+			
+			
+		-->
+		
+		<mx:State name="smethodType">
+			<mx:AddChild>
+				<mx:ComboBox id="cmbSMethodType"  width="100%"							 
+							 dataProvider="{Application.application.appStaticDataXML.SelectionMethods.SMethod}"
+							 selectedIndex="{getSelectedSMethodIndex()}"
+							 change="onSMethodTypeChange(event);"
+							 labelField="@name"
+							 />
+			</mx:AddChild>
+		</mx:State>
+		
+		<!-- resolution policy -->
+		<mx:State name="rpolicyType">
+			<mx:AddChild>
+				<mx:ComboBox id="cmbRPolicyType"  width="100%"							 
+							 dataProvider="{Application.application.appStaticDataXML.ResolutionPolicies.RPolicy}"
+							 selectedIndex="{getSelectedRPolicyIndex()}"
+							 change="onRPolicyTypeChange(event);"
+							 labelField="@name"
+							 />
+			</mx:AddChild>
+		</mx:State>
+		
+		<mx:State name="expr">
+			<mx:AddChild>
+				<mx:HBox width="100%" id="exprBox">
+					<mx:Button label="Edit" id="btEditExpr" click="onEditExpr()" />
+					<mx:Label truncateToFit="true" text="{data.value}" paddingLeft="2" />
+				</mx:HBox>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+</mx:HBox>	
+

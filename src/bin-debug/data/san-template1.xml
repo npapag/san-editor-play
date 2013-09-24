@@ -1,0 +1,10 @@
+<sans>
+		<san id="san1" base="http://play/sans/template-san-1">
+			<g name="goal 1" id="_g1">
+				<s name="situation 1" id="_s1" dialect="EP-SPARQL" definedBy="" />
+				<c name="condition 1" id="_c1" dialect="SPARQL" definedBy="" />
+				<a id="_a1">
+				</a>
+			</g>
+		</san>
+</sans>

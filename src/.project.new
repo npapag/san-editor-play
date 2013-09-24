@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>PLAYHSAWSIM</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>com.adobe.flexbuilder.project.flexbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>com.adobe.flexbuilder.project.flexnature</nature>
+		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>bin-release</name>
+			<type>2</type>
+			<location>C:/_DROPBOX_IMU/Dropbox/Library/Projects/2010 IST FP7 5th -PLAY (63-728)/04 - Work/WP-4 Interaction Users-Events-Services/SAN Editor</location>
+		</link>		
+	</linkedResources>
+</projectDescription>

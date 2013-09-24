@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import util.Util;
+			
+			import mx.controls.Alert;
+			import mx.controls.Tree;
+			import mx.core.Application;
+			import mx.managers.CursorManager;
+						
+			
+			[Bindable]
+			public var treeSAN:Tree;
+			[Bindable]
+			public var sanXML:XML;
+			
+			[Bindable]
+			public var selectedSANIndex:int = -1;
+			
+			public function init():void {
+				//this.treeSAN.addEventListener(Event.CHANGE,onTreeChange);				
+			}
+			
+			private function onTreeChange(e:Event):void {
+				trace("entity tree change: meta-data editor");				
+				CursorManager.setBusyCursor();
+				/*
+				item = (this.entityTree.selectedItem as XML);
+				trace(this+" : " + item.localName());
+				switch (item.localName()) {				
+					case "context":						
+						(this as VBox).visible = false; 
+						break;					
+					case "sans":						
+						(this as VBox).visible = false; 
+						break;
+					case "san":						
+						(this as VBox).visible = false; 
+						break;
+					default:
+						(this as VBox).visible = true;
+						refresh();
+				}*/				 			
+				CursorManager.removeBusyCursor();				
+			}
+			
+			private function refresh():void {
+				//this.dgrid.dataProvider = (item.meta as XMLList);//re-bind datagrid
+				trace("entity tree item meta-data");
+				//trace(item.meta);
+			}
+			
+			public function deleteItem(e:Event):void {				
+				
+				trace("Delete");
+			}
+			
+			private function onAdd():void {
+				var _id:String = Application.application.server.getNewIDWithPrefix("meta");
+				var newAttr:XML = <meta id={_id} name="meta-name" type="meta-type" value="value" />
+				//this.item.appendChild(newAttr);
+				refresh();
+				trace("Add :"+ newAttr.toXMLString());				
+			}
+		]]>
+	</mx:Script>	
+		<mx:HBox  width="100%" height="40"
+				  paddingLeft="5" paddingRight="5">
+			<mx:Label text="Name:" />
+			<mx:TextInput id="txtSanName" width="100%" 
+						  text="{this.sanXML.san[selectedSANIndex].@name}" 
+						  change="{this.sanXML.san[selectedSANIndex].@name = this.txtSanName.text;
+						  this.txtSANid.text =  util.Util.getIDFromName(this.txtSanName.text);}" 
+						  />
+		</mx:HBox>
+		<mx:HBox id="vboxSANProps2" label="SAN Properties" width="100%" height="40"
+				 paddingLeft="5" paddingRight="5">
+			<mx:Label text="ID:" />
+			<mx:TextInput id="txtSANid" width="100%" 
+						  text="{this.sanXML.san[selectedSANIndex].@id}" 
+						  change="{this.sanXML.san[selectedSANIndex].@id = this.txtSANid.text}" 
+						  />
+		</mx:HBox>
+	<!--
+		<mx:HBox id="vboxSANProps" label="SAN Properties" width="100%" height="50" 
+				 paddingLeft="5" paddingRight="5">
+			<mx:Label text="Base URI:" />
+			<mx:TextInput id="txtSANbase" width="100%" 
+						  text="{this.sanXML..san[0].@base}" 
+						  change="{this.sanXML..san[0].@base = this.txtSANbase.text}" 
+						  />
+		</mx:HBox>
+	-->
+</mx:VBox>

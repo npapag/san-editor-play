@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300">
+	<mx:Script>
+		<![CDATA[
+			import util.Util;
+			import mx.controls.Alert;
+			import mx.core.Application;
+			
+			import util.Validator;
+			
+			[Bindable]
+			public  var treeSAN:mx.controls.Tree;
+			[Bindable]
+			public var sanXML:XML;
+			
+			private var parentSituationTreeItem:XML = null;
+			
+			private var contexts:XML = util.Util.contextList ;
+			
+			public function init():void {
+				this.dgrid.dataProvider = treeSAN.selectedItem.ctxqry;
+				this.treeSAN.addEventListener(Event.CHANGE,onTreeChange);
+				parentSituationTreeItem = treeSAN.selectedItem as XML;
+				
+				contexts = util.Util.contextList ;
+				this.cmbContextTypes.dataProvider = contexts.Context;
+				this.cmbContextTypes.labelField = "@name";
+			}
+			
+			private function refresh():void {
+				this.dgrid.dataProvider = treeSAN.selectedItem.ctxqry;
+			}
+																				
+			private function onTreeChange(e:Event):void {
+				trace("enity tree change: context editor");								
+				parentSituationTreeItem = (this.treeSAN.selectedItem as XML);
+				trace(this+" : " + parentSituationTreeItem.localName());												
+			}
+			
+			private function onChangeContextType(event:Event):void {								 
+				//this.treeSAN.selectedItem.@type = event.currentTarget.selectedItem.@name;				
+			}
+			
+			private function addItem():void {				
+				trace("onValidateSAN");
+				var msgID:String = util.Validator.checkUniqueIDs(this.sanXML,null); //checkUniqueIDs(this.sanXML..san[0],null);
+				if (msgID != "") { 
+					Alert.show("Error. Please verify that contextualization query IDs are unique.\n"+msgID);
+					return;
+				}
+				var is_valid:Boolean = true;
+				if (txtId.text=="") {
+					is_valid = false;
+				}
+				if (txtDialect.text=="") {
+					is_valid = false;
+				}
+				if (txtLang.text=="") {
+					is_valid = false;
+				}				
+				if (txtDialect.text=="") {
+					is_valid = false;
+				}
+				if (!is_valid) {
+					Alert.show("Please fill all fields");
+					return;	
+				}
+				
+				var newAttr:XML = 
+					<ctxqry 
+						id={this.txtId.text}  
+						dialect={this.txtDialect.text} 
+						language={this.txtLang.text}
+						context={this.cmbContextTypes.selectedItem.@value} 
+						definedBy={this.txtExpression.text} 
+					/> ;
+				
+				this.parentSituationTreeItem.appendChild(newAttr);
+				//refresh();
+				trace("Add :"+ newAttr.toXMLString());
+				refresh();
+			}
+			
+			private function newItem():void {
+				this.txtDialect.text = "default"; 
+				this.txtLang.text = "SPARQL";
+				//this.txtContext.text = "global"; 
+				this.txtExpression.text = "";
+				this.txtId.text = Application.application.server.getNewIDWithPrefix("_clq");
+			}
+			
+			public function deleteItem(e:Event):void {
+				var target_id:String = null; 
+				target_id = this.dgrid.selectedItem.@id;
+				if (target_id==null) {Alert.show("Please select a row from the list."); return; }; 
+				if (parentSituationTreeItem!=null) {					                	            
+					var children:XMLList = XMLList(parentSituationTreeItem.children());
+					for(var i:Number=0; i < children.length(); i++) {
+						if( children[i].@id == target_id ) {
+							delete children[i];            	
+						}
+					}//for
+				}//if
+				refresh();
+				trace("Delete");
+			}
+			
+			private function updateItem():void {
+				//tree item
+				mx.controls.Alert.show("TODO");	
+			}
+			
+			private function onQueryListChange(event:Event):void {
+				var mycontext:String = this.dgrid.selectedItem.@context;
+				var idx:int = -1;
+				var found:Boolean = false;				
+				for each (var ctx:XML in contexts.Context)
+				{
+					//total2 += prop.@quantity * prop.price;
+					idx++;
+					if (ctx.@value == mycontext) {
+						this.cmbContextTypes.selectedIndex = idx;
+						found = true;
+						break;
+					}
+				} 				
+				if (!found) {					
+					this.cmbContextTypes.selectedIndex = 0;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:StringValidator source="{this.txtId}" property="text" 
+						required="true" />
+	<mx:StringValidator source="{this.txtDialect}" property="text" 
+						required="true" />
+	<mx:StringValidator source="{this.txtExpression}" property="text" 
+						required="true" />
+	<mx:StringValidator source="{this.txtLang}" property="text" 
+						required="true" />
+	<!--
+	<mx:StringValidator source="{this.txtContext}" property="text" 
+						required="true" />
+	-->
+						
+	<mx:TabNavigator id="sitTabNav" width="100%" height="100%" styleName="MyRibbonTab">
+		<mx:VBox label="Expression" width="100%">
+			<mx:Form  height="100%" width="100%">
+				<mx:FormItem label="Dialect" width="100%">
+					<mx:TextInput id="txtSitDialect" width="100"
+								  change="{treeSAN.selectedItem.@dialect = this.txtSitDialect.text;}"
+								  text="{treeSAN.selectedItem.@dialect}"
+								  />
+				</mx:FormItem>
+				<mx:FormItem label="Contextualizer Type" width="100%"> <!-- TODO Contextualizer type: RDF|NVP-->
+					<mx:TextInput id="txtSitCtxType" width="227"
+								  change="{treeSAN.selectedItem.@ctxtype = this.txtSitCtxType.text}"
+								  text="{treeSAN.selectedItem.@ctxtype}"
+								  />
+				</mx:FormItem>
+				<mx:FormItem label="Expression" width="100%">
+					<mx:TextArea id="txtSitExpr" height="150" width="100%"
+								 change="{treeSAN.selectedItem.@definedBy = this.txtSitExpr.text}"
+								 text="{treeSAN.selectedItem.@definedBy}" 
+								 />
+				</mx:FormItem>
+			</mx:Form>
+			<mx:HBox width="100%">												
+				<mx:Button label="Validate" click="{Alert.show(this.sanXML.toXMLString() ) }" />
+				<mx:Button label="Clear" click="{treeSAN.selectedItem.@definedBy=''}" />
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox label="Contextualization Queries" width="100%" height="100%">
+			<mx:DataGrid id="dgrid" width="100%" height="105" change="onQueryListChange(event)">
+				<mx:columns>
+					<mx:DataGridColumn headerText="ID" dataField="@id"
+									   width="40" resizable="true" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label truncateToFit="true" fontWeight="bold" />
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Expression" dataField="@definedBy"
+									   width="110" resizable="true" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label truncateToFit="true" fontWeight="bold" />
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Language" dataField="@language"
+									   width="28" resizable="true" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label truncateToFit="true" fontWeight="bold" />
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Dialect" dataField="@dialect"
+									   width="28" resizable="true" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label truncateToFit="true" fontWeight="bold" />
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Context" dataField="@context"
+									   width="28" resizable="true" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:Label truncateToFit="true" fontWeight="bold" />
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Action" width="30">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:LinkButton label="Delete"
+											   click="outerDocument.deleteItem(event)"/>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:VBox width="100%">
+				<mx:HBox width="100%">
+					<mx:Label text="ID :"/>
+					<mx:TextInput id="txtId" width="100%" text="{dgrid.selectedItem.@id}" /> 
+					<mx:Label text="Dialect :"/><!-- default|java|JS -->
+					<mx:TextInput id="txtDialect" width="100%" text="{dgrid.selectedItem.@dialect}"/>
+					<mx:Label text="Language :"/><!-- SPARQL|... -->
+					<mx:TextInput id="txtLang" width="100%" text="{dgrid.selectedItem.@language}"/>
+					<mx:Label text="Context :"/><!-- global|entity -->
+					<!--
+					<mx:TextInput id="txtContext" width="100%" text="{dgrid.selectedItem.@context}"/>
+					-->
+					<mx:ComboBox id="cmbContextTypes" change="onChangeContextType(event)"	/>
+				</mx:HBox>
+				<mx:Label text="Expression :" />
+				<mx:TextArea id="txtExpression" width="100%" height="120" text="{dgrid.selectedItem.@definedBy}" />
+				<mx:HBox>
+					<mx:Button id="btNew" label="New" click="newItem()" />
+					<mx:Button id="btAdd" label="Add" click="addItem()" />
+					<!--
+					<mx:Button id="btUpdate" label="Update" click="updateItem()" />
+					-->
+				</mx:HBox>				
+			</mx:VBox>
+		</mx:VBox>
+	</mx:TabNavigator>
+	
+</mx:VBox>

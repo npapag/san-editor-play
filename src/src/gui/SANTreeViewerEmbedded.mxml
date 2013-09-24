@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:ravis="org.un.cava.birdeye.ravis.graphLayout.visual.*"
+		 creationComplete="//init();" width="100%" height="100%" 
+		 xmlns:visual="org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.*" 
+		 xmlns:lc="org.un.cava.birdeye.ravis.components.ui.controls.layouterControls.*"
+		 xmlns:vc="org.un.cava.birdeye.ravis.components.ui.controls.vgraphControls.*"
+		 xmlns:ui="org.un.cava.birdeye.ravis.components.ui.*"
+		 xmlns:dp="org.un.cava.birdeye.ravis.components.ui.dataPresentation.*"
+		 xmlns:controls="org.un.cava.birdeye.ravis.enhancedGraphLayout.ui.controls.*"
+		 xmlns:flexlib="http://code.google.com/p/flexlib/"
+		 creationPolicy="all"
+		 >
+	<mx:XML id="xmldata" source="data/test.xml" />
+	
+	<mx:Style source="styles/main.css" />	
+	
+	<mx:WipeLeft id="wipeLeft" duration="1000" />
+	<mx:WipeRight id="wipeRight" duration="1000" />
+	
+	<mx:Script>
+		<![CDATA[
+			import converters.*;
+			
+			import mx.controls.Alert;
+			import mx.utils.ObjectUtil;
+			
+			import org.un.cava.birdeye.ravis.assets.icons.EmbeddedIcons;
+			import org.un.cava.birdeye.ravis.components.renderers.nodes.DefaultNodeRenderer;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.data.EnhancedGraph;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.event.VGEdgeEvent;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.event.VGNodeEvent;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.edgeRenderers.EdgeControlRenderer;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.edgeRenderers.EdgeDrawer;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.edgeRenderers.EdgeRenderer;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.nodeRenderers.EnhancedIconNodeRenderer;
+			import org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.nodeRenderers.NodeLabelRenderer;
+			import org.un.cava.birdeye.ravis.graphLayout.data.Graph;
+			import org.un.cava.birdeye.ravis.graphLayout.data.IGraph;
+			import org.un.cava.birdeye.ravis.graphLayout.data.INode;
+			import org.un.cava.birdeye.ravis.graphLayout.layout.HierarchicalLayouter;
+			import org.un.cava.birdeye.ravis.graphLayout.layout.ILayoutAlgorithm;
+			import org.un.cava.birdeye.ravis.graphLayout.visual.IEdgeRenderer;
+			import org.un.cava.birdeye.ravis.graphLayout.visual.IVisualNode;
+			import org.un.cava.birdeye.ravis.utils.TypeUtil;
+			
+			import renderers.nodes.mxml.sizeColorNodeRenderer;
+			
+			// graph datastructure object
+			private var graph:IGraph;
+			// active layouter
+			private var layouter:ILayoutAlgorithm;
+			// edge renderer
+			private var selectedEdgeRenderer:IEdgeRenderer;
+			// root node to start with
+			private var startRoot:IVisualNode;
+			// this is used to display the number of visible items
+			private var itemCount:int = 0;
+			// important to ensure we are done with the main initialisation
+			private var initDone:Boolean = false;
+			
+			private var san2SimpleGraph:SanToGraphConverterSimple;
+			private var san2FullGraph:SanToGraphConverterFull;
+			
+			[Bindable]
+			public var _sanXML:XML = null;
+			
+			private var _selectedSANIndex:int = -1;			
+			
+			public function renderSAN(sanXML:XML,selectedSANIndex:int,sitAsNode:Boolean,condAsNode:Boolean):Boolean {
+				//try {
+				this._sanXML = sanXML;
+				if (this.san2FullGraph==null) 
+					this.san2FullGraph = new SanToGraphConverterFull();					
+				this.initData(san2FullGraph.getGraph(sanXML,selectedSANIndex,sitAsNode,condAsNode));
+				//} catch (e:Error) {
+				//Alert.show(e.toString());
+				//return false;
+				//}
+				return true;
+			}
+			public function showHide(sitAsNode:Boolean,condAsNode:Boolean):void {
+				if (this._sanXML!=null)
+					renderSAN(this._sanXML,this._selectedSANIndex,sitAsNode,condAsNode)
+			}
+			
+			private function initData(gxml:XML):void {
+				var defaultNodeDistanceTop:Number = 0;				
+				var defaultNodeDistanceLeft:Number = 0;								
+				/* set the graph in the VGraph object, this automatically
+				
+				/* initializes the VGraph items */								
+				
+				graph = new EnhancedGraph("XMLAsDocsGraph",true);				
+				EnhancedGraph(graph).initFromXML(gxml); 
+				
+				vgraph.graph = graph;
+				/* set the default layouter type */
+				layouter = new HierarchicalLayouter(vgraph);
+				HierarchicalLayouter(layouter).orientation = HierarchicalLayouter.ORIENT_TOP_DOWN;
+				HierarchicalLayouter(layouter).linkLength = 8;
+				//HierarchicalLayouter(layouter).siblingSpreadDistance = 10;
+				//HierarchicalLayouter(layouter).margin = 10;
+				vgraph.layouter = layouter;
+				
+				/* set autofit */
+				HierarchicalLayouter(layouter).breadth = 200; //Hierarchical node spacing
+				layouter.layoutChanged = true;
+				layouter.autoFitEnabled = false;
+				
+				/* set the visibility limit options, default 2 */
+				//vgraph.maxVisibleDistance = 20;
+				
+				/* select a root node, most layouters requires a root node */
+				startRoot = graph.nodeByStringId("1").vnode; // 1: Omit SAN node = node 0
+				
+				/* set if edge labels should be displayed */
+				vgraph.displayEdgeLabels = true;
+				//vgraph.displayNodeLabels = true;
+				/* the following kicks it off .... */
+				vgraph.currentRootVNode = startRoot;				
+			//addEventListeners();
+				vgraph.doubleClickEnabled = false;
+				//myDegreeOS.updateMaxVisDist(); controls of separation
+				initDone = true;
+				
+				vgraph.centerNodeByStringId("1");
+				vgraph.draw();				
+				vgraph.centerNodeByStringId("1");
+								
+				//vgraph.move(this.width/2,0)
+				
+				/* set if edge labels should be displayed */
+				/*
+				vgraph.displayEdgeLabels = true;				
+				vgraph.currentRootVNode = startRoot;				
+				addEventListeners();				
+				myDegreeOS.updateMaxVisDist();				
+				initDone = true;
+				vgraph.draw();
+				*/				
+			}
+			
+			private function init_REMOVE():void { //NOT USESD TODO: REMOVE 
+				addEventListeners();
+				
+				//myDegreeOS.updateMaxVisDist();
+				
+				initDone = true;
+				vgraph.draw();
+				
+			return;//the rest is disabled //until dec 2012
+				
+				var defaultNodeDistanceTop:Number = 0;				
+				var defaultNodeDistanceLeft:Number = 0;								
+				
+				graph = new Graph("XMLAsDocsGraph",true);
+				//var vo:Object = TypeUtil.deserializeXMLString(xmldata);
+				Graph(graph).initFromXML(xmldata);				
+				
+				vgraph.graph = graph;
+				/* set the default layouter type */
+				layouter = new HierarchicalLayouter(vgraph);
+				HierarchicalLayouter(layouter).orientation = HierarchicalLayouter.ORIENT_TOP_DOWN;
+				HierarchicalLayouter(layouter).linkLength = 7;				
+				//layouter.breadth = 200; //Hierarchical node spacing
+				
+				vgraph.layouter = layouter;
+				
+				vgraph.edgeLabelRenderer = new ClassFactory(EdgeRenderer);
+				
+				/* select a root node, most layouters requires a root node */
+				startRoot = graph.nodeByStringId("1").vnode;
+				
+				/* set if edge labels should be displayed */
+				vgraph.displayEdgeLabels = true;
+				//vgraph.displayNodeLabels = true;
+				/* the following kicks it off .... */
+				vgraph.currentRootVNode = startRoot;
+				
+				addEventListeners();
+				
+				//myDegreeOS.updateMaxVisDist();
+				
+				initDone = true;
+				vgraph.draw();
+				
+			}
+			
+			private function addEventListeners():void
+			{
+				trace("**addEventListeners");
+				vgraph.addEventListener(MouseEvent.CLICK,vgraphEventHandler);
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_CLICK, nodeEventHandler);
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_DOUBLE_CLICK, nodeEventHandler);
+				/* vgraph.addEventListener(VGNodeEvent.VG_NODE_MOUSE_DOWN, nodeEventHandler);
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_MOUSE_UP, nodeEventHandler); */
+				
+				vgraph.addEventListener(VGEdgeEvent.VG_EDGE_CLICK, edgeEventHandler);
+				//vgraph.addEventListener(VGEdgeEvent.VG_EDGE_DOUBLE_CLICK, edgeEventHandler);
+				/* vgraph.addEventListener(VGEdgeEvent.VG_EDGE_MOUSE_DOWN, edgeEventHandler);
+				vgraph.addEventListener(VGEdgeEvent.VG_EDGE_MOUSE_UP, edgeEventHandler); */
+				
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_LABEL_CLICK, nodeLabelEventHandler);
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_LABEL_DOUBLE_CLICK, nodeLabelEventHandler);
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_LABEL_MOUSE_DOWN, nodeLabelEventHandler);
+				vgraph.addEventListener(VGNodeEvent.VG_NODE_LABEL_MOUSE_UP, nodeLabelEventHandler); 
+				
+				/* vgraph.addEventListener(VGEdgeEvent.VG_EDGE_LABEL_CLICK, edgeEventHandler);
+				vgraph.addEventListener(VGEdgeEvent.VG_EDGE_LABEL_DOUBLE_CLICK, edgeEventHandler);
+				vgraph.addEventListener(VGEdgeEvent.VG_EDGE_LABEL_MOUSE_DOWN, edgeEventHandler);
+				vgraph.addEventListener(VGEdgeEvent.VG_EDGE_LABEL_MOUSE_UP, edgeEventHandler); */
+			}
+			
+			private function edgeEventHandler(event:VGEdgeEvent):void
+			{
+				var dataInfo:String
+				if (event.edge.data is XML)
+					dataInfo = event.edge.data.toXMLString();
+				else
+					dataInfo = ObjectUtil.toString(event.edge.data);
+				trace("EDGE EVENT: " + event.type + ", data = " + dataInfo)
+			}
+			
+			private function nodeEventHandler(event:VGNodeEvent):void
+			{
+				//if (vgraph.enableDefaultDoubleClick == false)
+				{
+					var node:INode = event.node;
+					//vgraph.setVisibleNodeWithRelated(node.vnode);
+				}
+				trace("NODE EVENT: " + event.type);
+			}
+			
+			private function edgeLabelEventHandler(event:VGEdgeEvent):void
+			{
+				trace("EDGE LABEL EVENT: " + event.type);
+			}
+			
+			private function nodeLabelEventHandler(event:VGNodeEvent):void
+			{
+				trace("NODE LABEL EVENT: " + event.type);	
+			}
+			
+			private function vgraphEventHandler(event:Event):void
+			{
+				trace("VGRAPH EVENT: " + event.type);	
+			}
+			
+			/**
+			 * this updates the scale factor in all children of the vgraph
+			 * */   
+			public function updateScale():void {
+				
+				if(vgraph == null) {
+					trace("Cannot update Scale of VGraph, no valid vgraph!");
+					return;
+				}
+				
+				for each(var node:INode in vgraph.graph.nodes)
+				{
+					node.vnode.view.scaleX = scaleSlider.value;
+					node.vnode.view.scaleY = scaleSlider.value;					
+					
+				}
+				
+				/* check if we have a layouter at all */
+				if(vgraph.layouter != null) {
+					vgraph.layouter.layoutChanged = true;
+				} else {
+					trace("Cannot notify null layouter of layout change due to scaling.");
+				}
+				vgraph.draw();
+			}
+			
+			/** 
+			 * update the scale of the VGraph, thus creating a BirdEye zoom effect
+			 * this function can be passed a MouseEvent to handle scrollwheel zooming
+			 * @param event A MouseEvent.MOUSE_WHEEL
+			 * */		
+			public function updateVScale(event:MouseEvent):void {
+				
+				if(bzoom == null) {
+					return;
+				}
+				
+				if(vgraph == null) {
+					trace( "BirdEyeZoom NOT changed, no valid vgraph!");
+					return;
+				}
+				//_vgraph.scale = bzoom.value;
+				
+				// Handle the update for mousewheel events outside the component
+				if(event != null) {
+					if(event.delta != 0) {
+						if(bzoom.value == bzoom.minimum) {
+							if(event.delta > 0) {
+								bzoom.value = bzoom.value+(event.delta*0.01);
+								vgraph.scale = bzoom.value;
+							}
+						}
+						else if(bzoom.value == bzoom.maximum) {
+							if(event.delta < 0) {
+								bzoom.value = bzoom.value+(event.delta*0.01);
+								vgraph.scale = bzoom.value;
+							}
+						} else {
+							bzoom.value = bzoom.value+(event.delta*0.01);
+							vgraph.scale = bzoom.value;
+						}
+					}
+				}
+					// Handle the update for the zoom buttons
+				else {
+					if(bzoom.value <= bzoom.minimum) {
+						bzoom.value = bzoom.minimum;
+						return;
+					} else {
+						vgraph.scale = bzoom.value;
+					}
+					
+					if(bzoom.value >= bzoom.maximum) {
+						bzoom.value = bzoom.maximum;
+						return;
+					} else {
+						vgraph.scale = bzoom.value;
+					}
+				}
+			}
+		]]>
+	</mx:Script>	
+	<mx:VBox id="DivNavRB" width="100%" height="100%" paddingBottom="5" horizontalGap="5">
+		<!-- Graph Panel -->
+		<!-- controls 
+		<vc:DegreesOfSeparation id="myDegreeOS" vgraph="{vgraph}" />
+		-->
+		<mx:Canvas id="graphCnvs"
+				   borderStyle="solid"
+				   borderColor="#CCCCCC"
+				   backgroundColor="#FFFFFF"
+				   width="100%"
+				   height="100%"
+				   verticalScrollPolicy="off">
+			
+			<ravis:VisualGraph id="vgraph" width="100%" height="100%" 
+							   left="0" right="0" top="0" bottom="5" backgroundColor="#efffef" alpha="1"
+							   resize="vgraph.draw(VisualGraph.DF_RESET_LL)"							    
+							   itemRenderer="renderers.nodes.mxml.SANNodeRendererSprites"
+							   edgeLabelRenderer="renderers.edgelabels.mxml.SANEdgeLabelRenderer"
+							   visibilityLimitActive="false"
+							   />
+								
+			<!--
+			<visual:EnhancedVisualGraph id="vgraph" width="100%" height="100%" 
+			left="0" right="0" top="0" bottom="5" backgroundColor="#efffef" alpha="1"							   									    
+			itemRenderer="renderers.nodes.mxml.SANNodeRendererSprites"
+			edgeLabelRenderer="renderers.edgelabels.mxml.SANEdgeLabelRenderer"
+			visibilityLimitActive="false"
+			enableDefaultDoubleClick="false"
+			/>
+			<visual:EnhancedVisualGraph id="vgraph" width="100%" height="100%" 
+										left="0" right="0" top="0" bottom="5"
+										backgroundColor="#FFFFFF" alpha="1" enableDefaultDoubleClick="false"
+										visibilityLimitActive="true"
+										>
+			-->
+			<!--
+			<vc:ScaleControls id="mySCs" vgraph="{vgraph}" />
+			-->
+			<mx:HSlider
+				tickInterval=".25"
+				width="100"
+				id="scaleSlider"
+				value="1"
+				minimum=".5"
+				maximum="2.0"
+				snapInterval=".1"
+				liveDragging="true"
+				change="updateScale()"
+				 bottom="5" left="5"/>
+			<mx:HSlider
+				tickInterval=".25"
+				width="100"
+				id="bzoom"
+				value="1"
+				minimum=".25"
+				maximum="2"
+				liveDragging="true"
+				change="updateVScale(null)"
+				 bottom="5" left="120"/>
+		</mx:Canvas>		
+		<!-- End of Graph Panel -->
+		<!--
+		<lc:HierLayoutControls id="myHierLC" vgraph="{vgraph}" />
+		-->
+	</mx:VBox>
+	
+	<mx:states>
+		<mx:State name="showCntrlPanel">
+			<mx:SetStyle target="{DivNavRB}" name="horizontalGap" value="5" />
+		</mx:State>        
+		<mx:State name="hideCntrlPanel">
+			<mx:SetStyle target="{DivNavRB}" name="horizontalGap" value="0" />
+		</mx:State>
+	</mx:states>
+	
+</mx:VBox>

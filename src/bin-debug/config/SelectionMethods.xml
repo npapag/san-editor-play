@@ -1,0 +1,6 @@
+<XMLList>										
+	<SMethod name="Select" value="empty"/>
+	<SMethod name="LOWA" value="LOWA"/>												
+	<SMethod name="SMART" value="SMART"/>
+	<SMethod name="ELECTRE" value="ELECTRE"/>
+</XMLList>

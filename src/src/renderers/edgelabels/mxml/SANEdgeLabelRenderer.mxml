@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	verticalAlign="middle" horizontalAlign="center"
+	 >
+	<mx:Script>
+		<![CDATA[
+			private function getEdgeLabel():String {
+				var lbl:String = XML(this.data.data).@edgeLabel;
+												 
+				if (lbl.length > 0) {
+					var firstChar:String = lbl.substr(0, 1);				
+					var restOfString:String = lbl.substr(1, lbl.length);
+					lbl = firstChar.toUpperCase()+restOfString.toLowerCase();		
+				}
+				
+				return lbl;
+			}
+		]]>
+	</mx:Script>
+	<mx:Label textAlign="center"  
+		width="100" height="14" text="{getEdgeLabel()}" color="#2354C3"  fontSize="9" fontWeight="normal" fontStyle="italic" fontFamily="Verdana"/>
+	<mx:Spacer height="2" />
+</mx:VBox>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+		  creationComplete="init()"
+		 >
+	<mx:Script>
+		<![CDATA[
+			import util.Util;
+			
+			import mx.controls.Tree;
+			import mx.managers.CursorManager;
+			
+			[Bindable]
+			public var entityXML:XML;			
+			[Bindable]
+			public var entityTree:Tree;
+			private var item:XML = null;
+			
+			public function init():void {
+				this.entityTree.addEventListener(Event.CHANGE,onTreeChange);				
+			}
+			
+			private function onTreeChange(e:Event):void {
+				trace("enity tree change: entity editor");				
+				CursorManager.setBusyCursor();
+				item = (this.entityTree.selectedItem as XML);
+				switch (item.localName()) {				
+					case "entity":						
+						 this.txtEntityName.text = item.@name;   
+						 this.txtEntityID.text = item.@id;
+						 //this.txtEntityNS.text = item.@ns;
+						 this.txtDescr.text = item.@descr;
+						 this.chkAutoStart.selected = false;
+						 if (item.@auto_start!=null) 
+							 if (item.@auto_start=="true")
+						 		this.chkAutoStart.selected = true; 
+						break;					
+					default:
+						null;
+				}
+				CursorManager.removeBusyCursor();				
+			}
+			
+			private function onChange(e:Event):void {			
+				switch (e.currentTarget.id) {
+					case "txtEntityName":
+						//this.entityXML.descendants(item.localName()).(@id == item.@id).@[name] = this.txtEntityName.text;
+						this.item.@name = this.txtEntityName.text;
+						this.txtEntityID.text =  util.Util.getIDFromName(this.txtEntityName.text);
+						break;
+					case "txtEntityID":						
+						this.item.@id = this.txtEntityID.text;
+						break;
+					/*case "txtEntityNS":						
+						this.item.@ns = this.txtEntityNS.text;
+						break;*/
+					case "txtDescr":						
+						this.item.@descr = this.txtDescr.text;
+						break;
+					case "chkAutoStart":
+						if (this.chkAutoStart.selected)
+							this.item.@auto_start = "true";
+						else
+							this.item.@auto_start = "false";
+						break;
+					default:
+						null;
+				}									 					
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Label name="Entity Editor"  width="100%" text="Entity Editor"/>
+	<mx:Form >
+		<mx:FormItem label="ID :">
+			<mx:TextInput id="txtEntityID" width="300" maxChars="254" 
+						  change="onChange(event)" />
+		</mx:FormItem>
+		<mx:FormItem label="Name :">
+			<mx:TextInput id="txtEntityName" width="300" maxChars="254"
+						  change="onChange(event)" />
+		</mx:FormItem>
+		<mx:FormItem label="Auto Start :" >
+			<mx:CheckBox id="chkAutoStart"  change="onChange(event)" />
+		</mx:FormItem>
+		<!--
+		<mx:FormItem label="Base URI :">
+			<mx:TextInput id="txtEntityNS" width="300"  maxChars="254"
+						  change="onChange(event)" />
+		</mx:FormItem>
+		-->
+		<mx:FormItem label="Description :">
+			<mx:TextArea id="txtDescr"  width="400" height="100" maxChars="2000" 
+						 change="onChange(event)" />
+		</mx:FormItem>
+	</mx:Form>	
+</mx:VBox>

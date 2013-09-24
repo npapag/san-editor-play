@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" horizontalAlign="left"
+		  creationComplete="init()"
+		 >
+	<mx:Script>
+		<![CDATA[
+			import util.Util;
+			
+			import mx.controls.Tree;
+			import mx.managers.CursorManager;
+			
+			[Bindable]
+			public var entityXML:XML;			
+			[Bindable]
+			public var entityTree:Tree;
+			private var item:XML = null;
+			
+			public function init():void {
+				this.entityTree.addEventListener(Event.CHANGE,onTreeChange);				
+			}
+			
+			private function onTreeChange(e:Event):void {
+				trace("entity tree change: apool editor");				
+				CursorManager.setBusyCursor();
+				item = (this.entityTree.selectedItem as XML);
+				switch (item.localName()) {				
+					case "apool":						
+						 this.txtName.text = item.@name;   
+						 this.txtID.text = item.@id;
+						break;					
+					default:
+						null;
+				}
+				CursorManager.removeBusyCursor();				
+			}
+			
+			private function onChange(e:Event):void {
+				//mx.controls.Alert.show("txtEntityName");
+				switch (e.currentTarget.id) {
+					case "txtName":
+						//this.entityXML.descendants(item.localName()).(@id == item.@id).@[name] = this.txtEntityName.text;
+						this.item.@name = this.txtName.text;						
+						this.txtID.text =  util.Util.getIDFromName(this.txtName.text);
+						break;
+					case "txtID":						
+						this.item.@id = this.txtID.text;
+						break;
+					default:
+						null;
+				}									 					
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Label name="Action Pool Editor"  width="100%" text="Action Pool Editor"/>
+	<mx:Form >
+		<mx:FormItem label="ID :">
+			<mx:TextInput id="txtID" width="250" change="onChange(event)" />
+		</mx:FormItem>
+		<mx:FormItem label="Name :">
+			<mx:TextInput id="txtName" width="250" change="onChange(event)" />
+		</mx:FormItem>
+	</mx:Form>	
+</mx:VBox>

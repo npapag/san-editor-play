@@ -1,0 +1,53 @@
+<entities>
+<global>	
+	<prefix name=":" value="http://imu.ntua.gr/san/uc/taxi#" />
+	<prefix name="example:" value="http://example.namespaces.org/ns1#" />
+</global>
+<entity id="ent1" name="Entity1-name" >
+	<meta id="meta1-id" name="meta1-name" type="String" value="Value1" /> 
+	<context>
+		<attr id="attr1" name="attr1-name" type="String"/>
+		<attr id="attr2" name="attr2-name" type="String"/>
+	</context>
+	<sans>
+		<san id="san1" name="san1-name" base="http://play/sans/template-san-1">
+			<g name="goal 1.1" id="_g1" autostart="yes" type="root">				
+				<s name="situation 1.1" id="_s1" dialect="EP-SPARQL" definedBy="" ctx-type="RDF">
+					<ctxqry id="_ctxqry1"  
+						dialect="JS" 
+						language="SPARQL"
+						context="global" 
+						definedBy="select ?attr WHERE .." 
+					/>
+				</s>
+				<c name="condition 1.1" id="_c1" dialect="SPARQL" definedBy="" />
+				<a id="_a11">
+				</a>
+			</g>
+		</san>
+		<san id="san2" name="san2-name" base="http://play/sans/template-san-2">
+			<g name="goal 2.1" id="_g21" autostart="yes" type="root">
+				<meta id="meta2-id" name="meta2-name" type="String" value="Value2" />
+				<s name="situation 2.1" id="_s21" dialect="EP-SPARQL" definedBy="" />
+				<c name="condition 2.1" id="_c21" dialect="SPARQL" definedBy="" />
+				<a id="_a21">
+				</a>
+			</g>
+		</san>
+	</sans>
+	
+	<apool id="apool1" name="Action Pool1">
+		<sans>
+			<san id="san.a1.1" name="san.a1.1-name" base="http://play/sans/template-san-1">
+				<g name="goal ap1.1" id="_g1ap" autostart="no" type="root">				
+					<s name="situation a1.1" id="_as1" dialect="EP-SPARQL" definedBy="" />
+					<c name="condition a1.1" id="_ac1" dialect="SPARQL" definedBy="" />
+					<a id="_aa1" name="Action">
+					</a>
+				</g>
+			</san>
+		</sans>			
+	</apool>
+	
+</entity>
+</entities>

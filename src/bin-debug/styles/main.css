@@ -1,0 +1,442 @@
+@font-face
+{
+    src: url("../assets/fonts/MyriadWebPro.ttf");
+    font-family: main;
+    font-style: normal;
+    font-weight: normal;
+}
+
+@font-face
+{
+    src: url("../assets/fonts/MyriadWebPro-Bold.ttf");
+    font-family: main;
+    font-style: normal;
+    font-weight: bold;
+}
+
+@font-face 
+{
+	src:url("../assets/fonts/Inconsolata-ani_ok.otf");
+	font-family: "sandboxcode";
+	font-weight: bold;		
+	advanced-anti-aliasing: true;
+	unicodeRange: U+0041-U+005A, 
+		U+0061-U+007A, 
+		U+0030-U+0039, 
+		U+0020-U+002F, 
+		U+003A-U+0040, 
+		U+005B-U+0060, 
+		U+007B-U+007E; 
+}
+
+Application {
+	font-family: main;
+	font-size: 10;
+	backgroundColor: #a59414;
+}
+
+TextArea.codeTextArea
+{
+	font-family: "sandboxcode";
+	fontSize: 14;
+	font-weight:bold;
+	color: #404040;	
+}
+/*
+Application {
+	font-family: main;
+	font-size: 10;
+	backgroundColor: #ffffff;   	
+}
+*/
+
+.MyButton {
+	fillColors: #900A0A, #F49090;
+	color: #FBF7FB;
+	fillAlphas: 1.0, 1.0 ;
+	background-color: #ffffff;
+	textSelectedColor: #EC4545;
+	textRollOverColor: #C9E720;
+	themeColor: #041620;
+}
+
+.linkButtonWindowShade {
+	      	headerClass:ClassReference('mx.controls.LinkButton');
+	      	header-style-name: linkButtonStyle;	     
+	     	drop-shadow-enabled:true;	     	
+	      	corner-radius:5;
+	      	border-style:solid;	    	
+	    	background-color:#CCCCCC;
+	    	background-alpha:.7;
+	    }
+
+.propertyPanel {
+	headerClass:ClassReference('mx.controls.LinkButton');
+	header-style-name: linkButtonStyle;	
+	drop-shadow-enabled:false;	
+	corner-radius:3;
+	border-style:solid;	
+	background-color:#FFFFFF;
+	background-alpha:0.84;
+	borderThicknessLeft: 0;
+	borderThicknessRight: 0;
+	fontFamily: Verdana;
+	headerHeight: 20;
+} 
+
+.linkButtonStyle {
+	    	corner-radius:5;	
+	    	fill-alphas:1,1;
+	    	padding-left:10;
+	    	rollOverColor: #666666;
+	    	textRollOverColor: #ffffff;
+	    }
+
+ToolTip {
+   			backgroundAlpha: 0.85;
+   			backgroundColor: #111111;
+   			color: #ffffff;
+   			font-family: main;
+			font-size: 10;
+}
+
+.appWorkSpace {		
+	backgroundColor: #ebebeb;	
+	fontFamily: main;
+	fontSize: 11;
+	fontWeight: bold;			
+}
+
+.popUpWin {		
+	drop-shadow-enabled:false;	
+	corner-radius:0;
+	border-style:none;	
+	background-color:#8BA38B;
+	background-alpha:0.99;
+	selectedTabTextStyleName: "appSelectedTab";
+	tabOffset: 2;
+	horizontalGap: 5;
+	fontFamily: main;
+	fontSize: 11;
+	fontWeight: bold;			
+}
+
+.appTabNavigator {
+	backgroundColor: #ebebeb;
+	
+	tabStyleName: "appTabs";
+	firstTabStyleName: "appTabs";
+	lastTabStyleName: "appTabs";
+	selectedTabTextStyleName: "appSelectedTab";
+	tabOffset: 10;
+	paddingLeft: 0;
+	fontFamily: main;
+	fontSize: 11;
+	cornerRadius: 0;
+}
+
+.appTabs {
+	cornerRadius: 1;
+	color: #FFFFFF;
+	fillAlphas: 0.0, 0.0, 0.0, 0.0;
+	fillColors: #F0E56F, #F0E56F;
+	borderColor: #FFFFFF;
+	themeColor: #F8FAFB;
+	textRollOverColor: #FCFDFF;
+	textSelectedColor: #192E17;
+	disabledColor: #AAB3B3;	
+}
+
+.appFirstTab,
+.appLastTab {
+	cornerRadius: 0;	
+	paddingLeft: 10;
+	color: #F1F6F7;
+}
+
+.appSelectedTab {		
+	fontFamily: main;
+	fontWeight: bold;
+	textDecoration: none;
+	color: #191818;
+	fontSize: 12;
+	textRollOverColor: black;
+}
+
+.MySelectedTab {
+	cornerRadius: 0;
+	fillColors: #cccccc, #cccccc;
+	backgroundColor: #000000;	
+	themeColor: #cccccc;
+	textRollOverColor: yellow;
+	
+	font-weight: bold;
+	color: #FFFFFF;				
+	border-style: solid;
+	border-thickness: 1;
+	border-color: #000000;
+	selectedTabTextStyleName: tabNavigatorSelectedTabText;
+	firstTabStyleName: tabNavigatorFirstTab;
+}
+
+.MyTabNavigator {
+	backgroundColor: black;
+	cornerRadius: 15;
+	tabStyleName: "MyTabs";
+	firstTabStyleName: "MyTabs";
+	lastTabStyleName: "MyTabs";
+	selectedTabTextStyleName: "MySelectedTab";
+}
+
+.MyTabs {
+	cornerRadius: 15;
+	fillColors: #a5d414, #87c408;
+	backgroundColor: #87c408;
+	borderColor: #87c408;
+	themeColor: #a5d414;
+}
+
+.MyFirstTab,
+.MyLastTab {
+	cornerRadius: 15;
+	fillColors: #a5d414, #87c408;
+	backgroundColor: #87c408;
+	borderColor: #87c408;
+	themeColor: #a5d414;
+}
+
+.MySelectedTab2 {
+	cornerRadius: 0;
+	fillColors: #cccccc, #cccccc;
+	backgroundColor: #000000;	
+	themeColor: #cccccc;
+	textRollOverColor: yellow;
+		
+	font-weight: bold;
+	color: #FFFFFF;				
+	border-style: solid;
+	border-thickness: 1;
+	border-color: #000000;
+	selectedTabTextStyleName: tabNavigatorSelectedTabText;
+	firstTabStyleName: tabNavigatorFirstTab;
+}
+
+.MySelectedTabGreen {
+	cornerRadius: 15;
+	fillColors: #a5d414, #87c408;
+	backgroundColor: #87c408;
+	borderColor: #87c408;
+	themeColor: #a5d414;
+	textRollOverColor: white;
+}
+.tabNavigatorSelectedTabText
+{
+	fontWeight: bold;
+	color: #2E1A1A;
+	fontFamily: Verdana;
+	fontSize: 10;
+	textAlign: center;
+	disabledColor: #AFAEAE;
+}
+.tabNavigatorFirstTab
+{
+}
+@font-face
+{
+	fontFamily: MyriadWebPro;
+	fontWeight: normal;
+	fontStyle: normal;
+	src: url("../assets/fonts/MyriadWebPro.ttf");
+}
+.MyButtonBar
+{
+	themeColor: #A4C59B;
+	horizontalGap: 1;
+	fontFamily: Verdana;
+	color: #FFFFFF;
+}
+
+.MyRibbonTab {
+	tabOffset: 10;
+	cornerRadius: 0;	
+	horizontalGap: 0;
+	selectedTabTextStyleName: ribbonTabNavigatorSelectedTabText;
+	firstTabStyleName: tabNavigatorFirstTab;
+	color: black;
+	fontSize: 10;
+	textAlign: left;
+	backgroundColor: #F5F5F5;
+}
+
+.ribbonTabNavigatorSelectedTabText
+{
+	fontWeight: bold;
+	color: #2E1A1A;
+	fontFamily: Verdana;
+	fontSize: 10;
+	textAlign: left;
+	disabledColor: #AFAEAE;
+	textRollOverColor: black;
+}
+
+.SANTab {
+	tabOffset: 10;
+	cornerRadius: 0;	
+	horizontalGap: 0;
+	selectedTabTextStyleName: tabNavigatorSelectedTabText;
+	firstTabStyleName: tabNavigatorFirstTab;
+	color: #FEFFFF;
+	fontSize: 10;
+	textAlign: left;
+	backgroundColor: #F5F5F5;	
+}
+
+.linkButtonHAccordion {
+	headerClass:ClassReference('mx.controls.LinkButton');
+	header-style-name: linkButtonStyle;		
+}         
+
+.linkButtonWindowShade {
+	headerClass:ClassReference('mx.controls.LinkButton');
+	header-style-name: linkButtonStyle;		
+}         
+
+.linkButtonStyle {	
+	padding-left:10;
+}
+
+.linkButtonStyle.org {
+	corner-radius:10;       
+	fill-alphas:1,1;
+	padding-left:10;
+}
+
+Button {
+	cornerRadius: 2;
+	themeColor: #024F7B;
+	borderColor: #E3EDF4;
+	fillAlphas: 1.0, 1.0;
+	fillColors: #047BC0, #047BC0, #006198, #006198;
+	color: #F6FCFD;
+	textRollOverColor: #F3F6F9;
+	paddingTop: 3;
+	paddingBottom: 3;
+	horizontalGap: 2;
+	paddingLeft: 11;
+	paddingRight: 11;
+	fontFamily: Verdana;
+	fontWeight: bold;
+	textAlign: center;
+	kerning: false;		
+}
+
+LinkButton {
+	cornerRadius: 3;
+	themeColor: #024F7B;
+	borderColor: #E3EDF4;
+	fillAlphas: 1.0, 1.0;
+	fillColors: #047BC0, #047BC0, #006198, #006198;
+	color: #050505;	
+	textDecoration: underline;  
+	textRollOverColor: #FF0000;  
+	textSelectedColor: #2A00FF;  
+	paddingTop: 2;
+	paddingBottom: 2;
+	horizontalGap: 2;
+	paddingLeft: 11;
+	paddingRight: 11;	
+	fontWeight: bold;
+	textAlign: center;
+	kerning: false;		
+}
+ComboBox {
+	color: #F9FBFB;
+	dropdownStyleName: comboBoxDropdown;
+}
+
+@font-face
+{
+	fontFamily: MyriadWebPro-Bold;
+	fontWeight: bold;
+	fontStyle: normal;
+	src: url("../assets/fonts/MyriadWebPro-Bold.ttf");
+}
+.comboBoxDropdown
+{
+	color: #000000;
+	verticalScrollBarStyleName: listBaseVerticalScrollBar;
+}
+.listBaseVerticalScrollBar
+{
+}
+
+HAccordion
+{
+	backgroundColor: #FFFFFF;
+	borderStyle: "solid";
+	
+	paddingBottom: -1;
+	paddingLeft: -1;
+	paddingRight: -1;
+	paddingTop: -1;
+	verticalGap: -1;
+	horizontalGap: -1;
+	textAlign: "right";
+}
+
+VAccordion
+{
+	backgroundColor: #FFFFFF;
+	borderStyle: "solid";
+	
+	paddingBottom: -1;
+	paddingLeft: -1;
+	paddingRight: -1;
+	paddingTop: -1;
+	verticalGap: -1;
+	horizontalGap: -1;
+	textAlign: "left";
+}
+
+/*
+//------------------------------
+//  AccordionHeader
+//------------------------------
+*/
+
+AccordionHeader
+{
+	/*      selectedFillColors: #FFFFFF, #FFFFFF; */ /* overrides the calculated fillcolors */
+	
+	/*      disabledIcon: null; */
+	disabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	/*      downIcon: null; */
+	downSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	horizontalGap: 5;
+	/*      overIcon: null; */
+	overSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	paddingTop: 5;
+	paddingBottom: 5;
+	/*      selectedDisabledIcon: null; */
+	selectedDisabledSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	/*      selectedDownIcon: null; */
+	selectedDownSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	/*      selectedOverIcon: null; */
+	selectedOverSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	/*      selectedUpIcon: null; */
+	selectedUpSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	
+	/*      upIcon: null; */
+	upSkin: ClassReference("mx.skins.halo.AccordionHeaderSkin");
+	
+	fontFamily: accordionHeader; 
+	fontWeight:bold;
+	fontSize:11;
+	fontSharpness:-200;
+	fontThickness:-100;
+	fontGridFitType: none;
+	
+	
+}
+
+

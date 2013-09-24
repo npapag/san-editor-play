@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" compiles="true" parentProject="7ef4934b-b567-4005-aa49-f5c3faeb5b5f" projectUUID="7ef4934b-b567-4005-aa49-f5c3faeb5b5f" sdkVersion="3.5.0" uuid="07fbd49f-9876-46b0-aafa-6f415a7710a9" version="4">
+  <projects/>
+  <src/>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="07fbd49f-9876-46b0-aafa-6f415a7710a9"/>
+    <linked location="C:/Documents and Settings/Nikos/Adobe Flash Builder 4/PLAYHSAWSIM/libs" path="/libs" position="1" uuid="07fbd49f-9876-46b0-aafa-6f415a7710a9"/>
+    <linked location="C:/_PLAY/flex/ravis/RaVisExamples/libs/flexlib.swc" path="/linked-swc/flexlib.swc1/flexlib.swc" position="2" uuid="07fbd49f-9876-46b0-aafa-6f415a7710a9"/>
+    <linked location="C:/_PLAY/flex/ravis/libRaVis/released-binaries/flex3/libravis.swc" path="/linked-swc/libravis.swc1/libravis.swc" position="3" uuid="07fbd49f-9876-46b0-aafa-6f415a7710a9"/>
+  </swc>
+  <misc>
+    <linked location="C:/_DROPBOX_IMU/Dropbox/Library/Projects/2010 IST FP7 5th -PLAY (63-728)/04 - Work/WP-4 Interaction Users-Events-Services/M18/SAN Editor" path="/bin-release" position="0" uuid="07fbd49f-9876-46b0-aafa-6f415a7710a9"/>
+  </misc>
+  <theme/>
+</fxpProperties>

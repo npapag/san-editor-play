@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	verticalAlign="middle" horizontalAlign="center"
+	 >
+	<mx:Label textAlign="center"  
+		width="100" height="12" text="{XML(this.data.data).@edgeLabel}" color="#000000" />
+	<mx:Spacer height="2" />
+</mx:VBox>

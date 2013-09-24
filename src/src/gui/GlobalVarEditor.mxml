@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init();">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.controls.Tree;
+			import mx.controls.TextInput;
+			import mx.core.Application;
+			import mx.managers.CursorManager;
+			import mx.events.DataGridEvent;
+			import mx.events.DataGridEventReason;
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			public var entityXML:XML;			
+			[Bindable]
+			public var entityTree:Tree;
+			private var item:XML = null;
+			
+			public function init():void {
+				this.entityTree.addEventListener(Event.CHANGE,onTreeChange);				
+			}
+			
+			private function onTreeChange(e:Event):void {
+				trace("entity tree change: global var editor");				
+				CursorManager.setBusyCursor();
+				item = (this.entityTree.selectedItem as XML);
+				refresh();								 			
+				CursorManager.removeBusyCursor();				
+			}
+			
+			private function refresh():void {
+				this.dgridPrefixes.dataProvider = (item.prefix as XMLList);//re-bind datagrid
+				trace("entity tree item meta-data");
+				trace(item.meta);
+			}
+			
+			public function deleteItem(e:Event):void {				
+				var target_id:String = null; 
+				target_id = this.dgridPrefixes.selectedItem.@name;
+				if (target_id==":") {
+					Alert.show("Mandatory prefix. Cannot be deleted");
+					return;
+				}
+				if (target_id==null) {Alert.show("Please select a prefix from the list."); return; }; 
+				if (item!=null) {					                	            
+					var children:XMLList = XMLList(item.children());
+					for(var i:Number=0; i < children.length(); i++) {
+						if( children[i].@name == target_id ) {
+							delete children[i];            	
+						}
+					}//for
+				}//if
+				refresh();
+				trace("Delete");
+			}
+			
+			private function onAddPrefix():void {				
+				var newPrefix:XML = <prefix name="enter-name:"  value="http://enter-uri" />
+				this.item.appendChild(newPrefix);
+				refresh();
+				trace("Add :"+ newPrefix.toXMLString());
+			}
+			
+			private function verifyInput( event:DataGridEvent ) : void
+			{
+				// it is OK if the user cancels the edit
+				if( event.reason == DataGridEventReason.CANCELLED ) return;
+				
+				// grab the instance of the itemEditor. For this DataGrid, only the
+				// TextInput control is used as the editor, so it is safe to get the
+				// editor no matter what column has been edited.
+				var editor:TextInput = (event.currentTarget as DataGrid).itemEditorInstance as TextInput;
+				
+				// if  the edit is on the part number column, make sure it is not blank
+				if( event.dataField == "@name" )
+				{
+					if( editor.text.length == 0 ) {
+						// call event.preventDefault() so the edit will not continue and store the
+						// blank value
+						event.preventDefault();
+						// give the editor an error to display to the user
+						editor.errorString = "You must enter a prefix.";
+						return;
+					} else if( editor.text == ":" ) {
+						// call event.preventDefault() so the edit will not continue and store the
+						// blank value
+						event.preventDefault();
+						// give the editor an error to display to the user
+						editor.errorString = "This prefix is already defined.";
+						return;	
+					}
+				}
+				
+				// handle other columns here
+			}
+			
+			private function allowForEdit(event:DataGridEvent) : void
+			{
+				// if the field to be edited is a product, prevent the user from making
+				// changes if the permanent flag is true<. You can use more complex logic, 
+				// of course.
+				if( event.dataField == "@name" ) {					
+					//var item:Object = ((event.currentTarget as DataGrid).dataProvider as ArrayCollection)[event.rowIndex];
+					var item:XML = (event.currentTarget as DataGrid).selectedItem as XML;
+					if( item.@name == ":" ) {
+						event.preventDefault();
+					}
+				}
+				
+				// handle other columns here
+			}
+		]]>
+	</mx:Script>
+	<mx:Label text="RDF Prefixes" />
+	<mx:DataGrid id="dgridPrefixes" height="300" width="100%"
+				 itemEditBeginning="allowForEdit(event)"
+				 itemEditEnd="verifyInput(event)" editable="true">
+		<mx:columns>			
+			<mx:DataGridColumn dataField="@name" headerText="Prefix" width="40" 									   							   
+							   editable="true" >				
+			</mx:DataGridColumn>			
+			<mx:DataGridColumn dataField="@value" headerText="URL"  									   							   
+							   editable="true">				
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="@name" headerText="Action" width="100" editable="false">
+				<mx:itemRenderer>					
+					<mx:Component>						
+						<mx:LinkButton label="Delete" visible="{(data.@name == ':')?0:1}"
+									    enabled="{(data.@name == ':')?0:1}"
+									   click="{outerDocument.deleteItem(event)}"/>
+					</mx:Component>
+				</mx:itemRenderer>				
+			</mx:DataGridColumn>
+		</mx:columns>		
+	</mx:DataGrid>
+	<mx:HBox width="100%" height="28" horizontalAlign="left" >		
+		<mx:Button label="Add Prefix" click="onAddPrefix()"/>
+	</mx:HBox>
+</mx:VBox>

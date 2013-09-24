@@ -1,0 +1,55 @@
+<!-- Processed by Id: cwm.py,v 1.144 2003/09/14 20:20:20 timbl Exp -->
+<!--     using base file:/tmp/tmpRzPdv7-rdfconverter-->
+
+
+<rdf:RDF xmlns="file:/tmp/tmpRzPdv7-rdfconverter#"
+    xmlns:log="http://www.w3.org/2000/10/swap/log#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:protege="http://protege.stanford.edu/plugins/owl/protege#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:san="http://imu.ntua.gr/ontologies/san/2011/06/01/san.rdf#"
+    xmlns:swrl="http://www.w3.org/2003/11/swrl#"
+    xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
+    xmlns:test="http://www.test.com/test1#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:xsp="http://www.owl-ontologies.com/2005/08/07/xsp.owl#">
+
+    <owl:Ontology rdf:about="">
+        <owl:imports rdf:resource="http://imu.ntua.gr/ontologies/san/2011/06/01/san.rdf"/>
+    </owl:Ontology>
+
+    <san:ContextCondition rdf:about="#ContextCondition_1">
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">c1</san:name>
+    </san:ContextCondition>
+
+    <san:ContextCondition rdf:about="#ContextCondition_2">
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">c2</san:name>
+    </san:ContextCondition>
+
+    <san:Goal rdf:about="#Goal_2">
+        <san:hasAction rdf:resource="#OutputAction_1"/>
+        <san:hasContextCondition rdf:resource="#ContextCondition_2"/>
+        <san:hasSituation rdf:resource="#Situation_2"/>
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">g2</san:name>
+    </san:Goal>
+
+    <san:OutputAction rdf:about="#OutputAction_1">
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">action2</san:name>
+    </san:OutputAction>
+
+    <san:RootGoal rdf:about="#RootGoal_1">
+        <san:hasAction rdf:resource="#Goal_2"/>
+        <san:hasContextCondition rdf:resource="#ContextCondition_1"/>
+        <san:hasSituation rdf:resource="#Situation_1"/>
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">g1</san:name>
+    </san:RootGoal>
+
+    <san:Situation rdf:about="#Situation_1">
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">s1</san:name>
+    </san:Situation>
+
+    <san:Situation rdf:about="#Situation_2">
+        <san:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">s2</san:name>
+    </san:Situation>
+</rdf:RDF>

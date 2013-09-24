@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+		   xmlns:ravis="org.un.cava.birdeye.ravis.graphLayout.visual.*"
+		   creationComplete="init();" 
+		   width="100%" height="100%" 
+		   xmlns:visual="org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.*" 
+		   xmlns:lc="org.un.cava.birdeye.ravis.components.ui.controls.layouterControls.*"
+		   xmlns:vc="org.un.cava.birdeye.ravis.components.ui.controls.vgraphControls.*"
+		   xmlns:ui="org.un.cava.birdeye.ravis.components.ui.*"
+		   xmlns:dp="org.un.cava.birdeye.ravis.components.ui.dataPresentation.*"
+		   xmlns:controls="org.un.cava.birdeye.ravis.enhancedGraphLayout.ui.controls.*"
+		   xmlns:flexlib="http://code.google.com/p/flexlib/"
+		   xmlns:s="library://ns.adobe.com/flex/spark"		  
+		   creationPolicy="all"
+		   autoLayout="true"
+		   borderStyle="none" xmlns:local="*" xmlns:gui="gui.*">
+	
+	<mx:Style source="styles/main.css" />
+	
+	<mx:WipeLeft id="wipeLeft"   duration="1000" />
+	<mx:WipeRight id="wipeRight" duration="1000" />
+	
+	<mx:Script source="EditorScript.as" />
+	<mx:Script>
+		<![CDATA[
+			private const maximizedHeight:int = 30; 
+			private const maximizedWidth:int  = 290; //main controls Expand,Delete,Root
+			private const maximizedWidthA:int = 300; //action controls
+			private const maximizedWidthG:int = 320;
+			private const maximizedWidthD:int = 295;
+			private const maximizedWidthS:int = 320;
+			private const maximizedWidthC:int = 320;
+			
+			[Bindable]
+			private var _ENTITY_TREE_WIDTH:int = 220;
+			
+			import mx.containers.Accordion;
+			/* We have to embed a font for the VAccordion. Without doing this the
+			* labels that are rotated will be invisible. In AccordionDefaults.css
+			* we reference the bolded font named 'accordionHeader' so that needs 
+			* to match here. */
+			[Embed(systemFont='Arial', fontWeight="bold", fontName='accordionHeader', mimeType='application/x-font', advancedAntiAliasing='true')] 
+			private var font1:Class;		
+			
+			public function onMEClick(e:Event):void {
+				trace(":"+(this.wShadeMetaDataEditor as WindowShade).height);
+				//(this.wShadeMetaDataEditor as WindowShade).height = 500;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:XML id="templateSAN" source="data/san-template1.xml">	
+	</mx:XML>
+	
+	<mx:XML id="templateENTSAN" source="data/entities-sans-template.xml">	
+	</mx:XML>
+	
+	<mx:HBox id="DivNavRB" width="100%" height="100%" paddingBottom="5" horizontalGap="5" paddingRight="5"			 
+			 styleName="appWorkSpace" verticalAlign="top"  borderStyle="none" dropShadowEnabled="true">
+		<mx:VBox id="vboxMain" 
+				 width="100%" height="100%" paddingBottom="5"  paddingLeft="5" paddingRight="1">
+			<mx:TabNavigator id="ribbonTabNav" creationPolicy="all" width="100%" height="65"
+							 styleName="MyRibbonTab"		 >
+				<mx:HBox id="tabFILE" width="100%" horizontalAlign="left"
+						 paddingLeft="5"
+						 borderColor="#E7F8E3" label="File" dropShadowEnabled="true">
+					<mx:Button id="btSANNew" label="New"/>
+					<mx:Button id="btSANLoad" label="Load"/>
+					<mx:Button id="btSANSave" label="Save"/>
+					<mx:Button id="btSANExport" label="Export to RDF/N3"
+							   themeColor="#EBF1F4" />
+					<mx:Button id="btSANPreviewN3" label="Preview RDF/N3"
+							   themeColor="#EBF1F4" />
+					<mx:Button id="btValidateSAN" label="Validate"
+							   themeColor="#EBF1F4"
+							   click="onValidateSAN()"
+							   />					
+				</mx:HBox>
+				<mx:HBox id="tabEntities" label="Entities">					
+					<mx:Button id="btAddEntity" label="New Entity"/>
+					<mx:Button id="btAddAPool" label="New Action Pool"/>
+					<mx:Button id="btAddSAN" label="New SAN"/>
+					<mx:Button id="btDeleteEntityItem" label="Delete" />
+				</mx:HBox>
+				<mx:HBox id="tabSAN" width="100%" horizontalAlign="left" label="SAN"
+						 horizontalScrollPolicy="off" paddingLeft="5"
+						 verticalScrollPolicy="off"
+						 horizontalGap="0">
+					<mx:HBox id="ctrlItem" width="{maximizedWidth+100}" height="100%" >
+						<!--<mx:Button id="btItemUpdate" label="Update" />-->						
+						<mx:Button id="btNewRootGoal" label="RootGoal" styleName="MyRibbonButton" />
+						<mx:Button id="btItemDelete" label="Delete" styleName="MyRibbonButton" />
+						<mx:Button id="btExpandAll" label="Expand" styleName="MyRibbonButton"
+								   click="{if (btExpandAll.label=='Expand') {btExpandAll.label='Collapse';onExpandAll(true);} else {btExpandAll.label='Expand';onExpandAll(false)} }"
+								   />
+						<!--
+						<mx:Button id="btPreviewSAN2" label="Preview"
+						themeColor="#EBF1F4"
+						click="previewSAN()"
+						/>
+						-->
+						<mx:VRule height="100%"/>
+					</mx:HBox>					
+					<mx:HBox id="actionActions" width="{maximizedWidthA}" height="100%" verticalAlign="top" 
+							 horizontalAlign="left" borderStyle="none" >						
+						<mx:Button id="btSetGoalAction" label="Action" styleName="MyRibbonButton" />
+						<mx:Label text="Type: " />
+						<mx:ComboBox id="cmbGoalActions" width="120" 
+									 close="//closeHandler(event);"/>
+						<mx:VRule height="100%"/>
+					</mx:HBox>					
+					<mx:HBox id="goalActions" width="{maximizedWidthG}" height="100%" 
+							 verticalAlign="top" horizontalAlign="left" >									
+						<!--<mx:Label text="Add: " />-->
+						<mx:Button id="btAddSituation" label="Situation" styleName="MyRibbonButton" />							
+						<mx:Button id="btAddCondition" label="C.Condition" styleName="MyRibbonButton" />
+						<mx:Button id="btAddAction" label="Action" styleName="MyRibbonButton" />
+						<mx:VRule height="100%"/>
+					</mx:HBox>					
+					<mx:HBox id="decoratorActions" width="{maximizedWidthD}" height="100%" >						
+						<mx:Button id="btAddDecorator" label="Decorator" styleName="MyRibbonButton" />
+						<mx:Label text="Type: " />
+						<mx:ComboBox id="cmbDecoratorActions" width="120" 
+									 close="//closeHandler(event);"/>
+						<mx:VRule height="100%"/>
+					</mx:HBox>										
+				</mx:HBox>
+			</mx:TabNavigator>
+			
+			<mx:HBox id="hdivMain" width="100%" height="100%" horizontalGap="2">				
+				<!--  ******* Entity Tree *********** -->
+				<ui:Grip id="navGrip"  
+						 width="17" height="100%" horizontalAlign="center"
+						 gripTip="Show/Hide Entity Tree" />
+				<mx:Tree id="treeEntities" width="{_ENTITY_TREE_WIDTH}" height="100%"
+						 dataProvider="{entsanXMLList}" 
+						 itemRenderer="trees.EntityTreeItemRenderer"
+						 dataDescriptor="{new trees.EntityTreeDescriptor()}"
+						 change="{onEntityTreeChange()}"
+						 />
+				
+				<mx:VBox id="vdivMain" width="100%" height="100%">					
+					<mx:ViewStack id="vsEntityTreeItemEditor" width="100%" height="100%">
+						<mx:VBox id="welcomeViewer" width="100%" height="100%">
+							<mx:Text text="Welcome message... " />
+						</mx:VBox>
+						<!-- Entity Editor -->					
+						<gui:EntityEditor width="100%" height="100%"
+											entityTree="{this.treeEntities}" entityXML="{this.entsanXML}"
+											/>
+						
+						<!-- Context Editor -->					
+						<gui:ContextEditor width="100%" height="100%" 
+											 entityTree="{this.treeEntities}" entityXML="{this.entsanXML}"
+											 />
+						<!--  SAN    Editor / Viewer -->
+						<flexlib:HAccordion id="tabSANEditView" 
+											change="{
+											if (tabSANEditView.selectedIndex==1) {
+											previewSAN();
+											} 
+											}"
+											width="100%" height="100%">
+							<!--
+							<mx:TabNavigator id="tabSANEditView"
+							styleName="SANTab"
+							change="{
+							if (tabSANEditView.selectedIndex==1) {
+							previewSAN();
+							} 
+							}" 
+							>
+							-->
+							<!--  SAN    Editor -->
+							<mx:VBox width="100%" height="100%" label="Edit"  textAlign="left">							
+								<mx:HDividedBox id="hdivSANTreeEditor"
+												horizontalScrollPolicy="off"
+												label="Edit" width="100%" height="100%">	
+									<!-- SAN Tree -->
+									<mx:Tree id="treeSAN" width="100%" height="100%"										  
+											 showRoot="false"										 
+											 dataProvider="{sanXMLList}"			 
+											 itemRenderer="trees.SANTreeItemRenderer"
+											 dataDescriptor="{new trees.SANTreeDescriptor()}"
+											 variableRowHeight="true"
+											 change="{onTreeSANChange()}"
+											 iconFunction="tree_iconFunc"
+											 borderStyle="none" alpha="0.98"
+											 showDataTips="true"
+											 dataTipFunction="getItemTip"
+											 click="{this.btbarProperties.selectedIndex=1; this.vstackProperties.selectedIndex=1}"
+											 doubleClick="//onEditDetails(event)"
+											 itemDoubleClick="onEditDetails(event)"
+											 itemClick="//{Alert.show(event.toString())}"
+											 doubleClickEnabled="true"
+											 editable="false"
+											 backgroundColor="#FFFFFF"
+											 dragEnabled="true"
+											 dropEnabled="true"
+											 dragMoveEnabled="true"
+											 dragEnter="treeDragEnterHandler(event);" 
+											 dragDrop="treeDragDropHandler(event);"
+											 dropShadowEnabled="true"/>				
+									<mx:VBox id="vboxItemPropertiesMain" width="350" height="100%" 
+											 horizontalAlign="left"
+											 horizontalScrollPolicy="off"
+											 verticalScrollPolicy="off"
+											 label="Edit Properties">
+										<mx:Spacer height="1" />
+										<mx:VBox height="44" width="100%" verticalAlign="middle" 
+												 backgroundColor="#FFFFFF" borderStyle="solid" borderColor="#9FA4A8">
+											<mx:ToggleButtonBar id="btbarProperties" itemClick="btbarClick(event);" styleName="_no_MyButtonBar">
+												<mx:dataProvider>
+													<mx:Array>
+														<mx:String>SAN</mx:String>
+														<mx:String>SAN Item</mx:String>
+													</mx:Array>
+												</mx:dataProvider>
+											</mx:ToggleButtonBar>
+										</mx:VBox>
+										
+										<mx:ViewStack id="vstackProperties" borderStyle="none" width="100%" height="100%" color="0x323232">
+											<gui:SANMetaDataEditor 
+												treeSAN="{this.treeSAN}" 
+												sanXML="{this.sanXML}"
+												selectedSANIndex="{this.selectedSANIndex}"
+												id="sanMetaDataEditor" 
+												width="100%" height="100%"
+												>									
+											</gui:SANMetaDataEditor>
+											
+											<!-- SAN Details end.-->
+											<mx:VBox
+												id="windowshade1"
+												styleName="propertyPanel" 
+												label="Item Properties"
+												width="100%"
+												height="100%"
+												horizontalAlign="center" verticalAlign="top"
+												paddingBottom="5"
+												borderStyle="none" dropShadowEnabled="true"><!-- Item Properties -->
+												<!--
+												<mx:VBox id="pnlItemDetails" width="100%" height="20" horizontalAlign="left" paddingTop="15">								
+													<mx:Label id="lblItemType" text=""  fontWeight="bold" fontFamily="Verdana" 
+															  fontSize="11" width="100%" color="#323131"/>								
+													<mx:HRule width="100%" />										
+												</mx:VBox>
+												-->
+												<gui:SANPropertyGrid id="pgrid" height="100%" width="100%" 
+																	   treeSAN="{this.treeSAN}" sanXML="{this.sanXML}" />							
+											</mx:VBox>						
+										</mx:ViewStack><!-- SAN Item Properties -->
+									</mx:VBox>
+								</mx:HDividedBox>															
+							</mx:VBox>																
+							<gui:SANTreeViewerEmbedded label="View" id="sanTreeViewerEmbeded" />
+							
+							<!--</mx:TabNavigator>-->																			
+						</flexlib:HAccordion>
+						
+						<mx:VBox id="emptyViewer" width="100%" height="100%" textAlign="left"><!-- Empty Entity Item Viewer -->
+							<mx:Text width="100%" height="100%" id="txtMessage" text="..." />
+						</mx:VBox>
+						<gui:ActionPoolEditor width="100%" height="100%" textAlign="center"
+												entityTree="{this.treeEntities}" entityXML="{this.entsanXML}"
+												/>
+						<gui:GlobalVarEditor  width="100%" height="100%" textAlign="left"
+												entityTree="{this.treeEntities}" entityXML="{this.entsanXML}" />
+					</mx:ViewStack><!-- Entity Item Properties -->
+					<!-- meta-data editor -->
+					<flexlib:WindowShade id="wShadeMetaDataEditor" width="100%" label="Metadata"
+										 styleName="_no_linkButtonWindowShade"  opened="false"
+										 tabChildren="false" click="{onMEClick(event)}"										 
+										 >											
+						<gui:MetaDataEditor height="100%" width="100%"
+											  entityTree="{this.treeEntities}" entityXML="{this.entsanXML}"
+											  />
+					</flexlib:WindowShade>
+				</mx:VBox>				
+			</mx:HBox>
+		</mx:VBox>							
+	</mx:HBox> <!-- End of HBox -->
+	
+	<mx:transitions>
+		<mx:Transition fromState="*" toState="*">
+			<mx:Resize target="{treeEntities}" />
+		</mx:Transition>
+	</mx:transitions>
+	<mx:states>
+		<!-- the states showCntrlPanel/hideCntrlPanel are set by the ui:Grip -->
+		<mx:State name="showCntrlPanel">
+			<mx:SetProperty target="{treeEntities}" name="width" value="{_ENTITY_TREE_WIDTH}" />
+			<!-- <mx:SetStyle target="{DivNavRB}" name="horizontalGap" value="5" /> -->
+		</mx:State>        
+		<mx:State name="hideCntrlPanel">
+			<mx:SetProperty target="{treeEntities}" name="width" value="0" />
+			<!-- <mx:SetStyle target="{DivNavRB}" name="horizontalGap" value="0" /> -->
+		</mx:State>
+		
+		<mx:State name="showGoal">
+			<mx:SetProperty target="{goalActions}" 		name="width" value="{maximizedWidthG}" />
+			<mx:SetProperty target="{goalActions}" 		name="visible" value="true" />			
+			<mx:SetProperty target="{decoratorActions}" name="width" value="{maximizedWidthD}" />
+			<mx:SetProperty target="{decoratorActions}" name="visible" value="true" />			
+			<mx:SetProperty target="{actionActions}" 	name="width" value="0" />
+			<mx:SetProperty target="{actionActions}" 	name="visible" value="false" />									
+		</mx:State>        
+		<mx:State name="showSituation">
+			<mx:SetProperty target="{goalActions}" 		name="width" value="0" />
+			<mx:SetProperty target="{goalActions}" 		name="visible" value="false" />
+			<mx:SetProperty target="{actionActions}" 	name="width" value="0" />
+			<mx:SetProperty target="{actionActions}" 	name="visible" value="false" />
+			<mx:SetProperty target="{decoratorActions}" name="width" value="0" />
+			<mx:SetProperty target="{decoratorActions}" name="visible" value="false" />			
+		</mx:State>
+		<mx:State name="showCondition">
+			<mx:SetProperty target="{goalActions}" 		name="width" value="0" />
+			<mx:SetProperty target="{goalActions}" 		name="visible" value="false" />
+			<mx:SetProperty target="{actionActions}" 	name="width" value="0" />
+			<mx:SetProperty target="{actionActions}" 	name="visible" value="false" />
+			<mx:SetProperty target="{decoratorActions}" name="width" value="0" />
+			<mx:SetProperty target="{decoratorActions}" name="visible" value="false" />			
+		</mx:State>
+		<mx:State name="showAction">			
+			<mx:SetProperty target="{actionActions}" 	name="width" value="{maximizedWidthA}" />
+			<mx:SetProperty target="{actionActions}" 	name="visible" value="true" />
+			<mx:SetProperty target="{goalActions}" 		name="width" value="0" />
+			<mx:SetProperty target="{goalActions}" 		name="visible" value="false" />
+			<mx:SetProperty target="{decoratorActions}" name="width" value="{maximizedWidthD}" />
+			<mx:SetProperty target="{decoratorActions}" name="visible" value="true" />			
+		</mx:State>
+		<mx:State name="showDecorator">			
+			<mx:SetProperty target="{actionActions}" 	name="width" value="{maximizedWidthA}" />
+			<mx:SetProperty target="{actionActions}" 	name="visible" value="true" />
+			<mx:SetProperty target="{goalActions}" 		name="width" value="0" />
+			<mx:SetProperty target="{goalActions}" 		name="visible" value="false" />
+			<mx:SetProperty target="{decoratorActions}" name="width" value="{maximizedWidthD}" />
+			<mx:SetProperty target="{decoratorActions}" name="visible" value="true" />			
+		</mx:State>
+		<mx:State name="showNothing">
+			<mx:SetProperty target="{goalActions}" 		name="width" value="0" />
+			<mx:SetProperty target="{goalActions}" 		name="visible" value="false" />
+			<mx:SetProperty target="{actionActions}" 	name="width" value="0" />
+			<mx:SetProperty target="{actionActions}" 	name="visible" value="false" />
+			<mx:SetProperty target="{decoratorActions}" name="width" value="0" />
+			<mx:SetProperty target="{decoratorActions}" name="visible" value="false" />
+		</mx:State>		
+	</mx:states>	
+</mx:Canvas>

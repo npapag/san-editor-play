@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"		   
+		   creationComplete="init();" 
+		   width="100%" height="100%" 
+		   xmlns:visual="org.un.cava.birdeye.ravis.enhancedGraphLayout.visual.*" 
+		   xmlns:lc="org.un.cava.birdeye.ravis.components.ui.controls.layouterControls.*"
+		   xmlns:vc="org.un.cava.birdeye.ravis.components.ui.controls.vgraphControls.*"
+		   xmlns:ui="org.un.cava.birdeye.ravis.components.ui.*"
+		   xmlns:dp="org.un.cava.birdeye.ravis.components.ui.dataPresentation.*"
+		   xmlns:controls="org.un.cava.birdeye.ravis.enhancedGraphLayout.ui.controls.*"
+		   xmlns:ravis="org.un.cava.birdeye.ravis.graphLayout.visual.*"
+		   xmlns:flexlib="http://code.google.com/p/flexlib/"
+		   xmlns:s="library://ns.adobe.com/flex/spark"		  
+		   creationPolicy="all"
+		   autoLayout="true"
+		   borderStyle="none" xmlns:local="*" label="SAN Manager" styleName="propertyPanel">	
+	<mx:Style source="styles/main.css" />	
+	<mx:WipeLeft id="wipeLeft" duration="1000" />
+	<mx:WipeRight id="wipeRight" duration="1000" />		
+	<mx:Script>
+		<![CDATA[			
+			import mx.controls.Alert;
+			private function init():void {
+				/*
+					if connected enable else connect
+				*/
+				//Alert.show("Connected");
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox width="800" height="100%" x="50" top="20" bottom="20">
+		<mx:DataGrid id="dgSAN"  width="100%" height="250">
+			<mx:columns>
+				<mx:DataGridColumn dataField="id" headerText="ID"
+								   width="15" resizable="true" editable="false">
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:Label truncateToFit="true" fontWeight="bold" />
+						</mx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn dataField="name" headerText="Name"
+								   width="100" resizable="true" editable="false">
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:Label truncateToFit="true" fontWeight="bold" />
+						</mx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+				<mx:DataGridColumn dataField="status" headerText="Status"
+								   width="25" resizable="true" editable="false">
+					<mx:itemRenderer>
+						<mx:Component>
+							<mx:Label truncateToFit="true" fontWeight="bold" />
+						</mx:Component>
+					</mx:itemRenderer>
+				</mx:DataGridColumn>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:HBox width="100%">
+			<mx:Button id="btDeploy" enabled="false" name="Deploy SAN"  label="Deploy SAN"/>
+			<mx:Button id="btStart" enabled="false" name="Start SAN"  label="Start SAN"/> 
+			<mx:Button id="btStop" enabled="false" name="Stop SAN"  label="Stop SAN"/>
+		</mx:HBox>
+		<mx:Form width="100%">
+			<mx:FormItem width="100%" label="SAN Name:">
+				<mx:TextInput id="txtSANName" width="100%" />
+			</mx:FormItem>
+		</mx:Form>
+		<mx:TextArea id="txtSANN3" width="100%" height="100%">
+			
+		</mx:TextArea>
+	</mx:VBox>
+	
+</mx:Canvas>
